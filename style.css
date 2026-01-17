@@ -1,0 +1,347 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+#panorama {
+  width: 100%;
+  height: 100vh;
+  background: #000;
+}
+
+/* Remove UI Pannellum */
+.pnlm-about-msg { display: none !important; }
+.pnlm-load-box, .pnlm-lbar, .pnlm-lbar-fill, .pnlm-lmsg { display: none !important; }
+
+/* ==========================
+   INTRO IMAGE ZOOM-OUT
+========================== */
+.intro-overlay{
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9999;
+  overflow: hidden;
+}
+.intro-image{
+  width: 100%;
+  height: 100%;
+  background-image: url("images/intro.jpg");
+  background-size: cover;
+  background-position: center;
+  animation: zoomOut 5s ease forwards;
+}
+@keyframes zoomOut{
+  from{ transform: scale(1.12); }
+  to{ transform: scale(1); }
+}
+.skip-btn{
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+.skip-btn:hover{ background: rgba(0,0,0,0.75); }
+.intro-overlay.is-hiding{
+  opacity: 0;
+  transition: opacity 320ms ease;
+  pointer-events: none;
+}
+
+/* ==========================
+   TOP UI (moderno)
+========================== */
+.top-ui{
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  z-index: 9998;
+  pointer-events: none;
+}
+
+/* Nome do sítio (top-left) — sem caixa */
+.site-title{
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  pointer-events: none;
+  padding: 0;              /* ✅ sem caixa */
+  background: transparent; /* ✅ sem caixa */
+  border: 0;               /* ✅ sem caixa */
+  backdrop-filter: none;   /* ✅ sem blur */
+  color: #fff;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+  font-size: 18px;
+  text-shadow: 0 18px 40px rgba(0,0,0,0.55);
+}
+
+/* Barra de ícones centrada MESMO no ecrã */
+.iconbar{
+  pointer-events: auto;
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  backdrop-filter: none;
+}
+
+/* Botões com PNG */
+.iconbtn{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.iconbtn img{
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+
+  /* ✅ força branco */
+  filter: brightness(0) invert(1) drop-shadow(0 8px 14px rgba(0,0,0,0.5));
+  opacity: 0.95;
+}
+
+.iconbtn:hover{
+  transform: translateY(-1px) scale(1.03);
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.22);
+}
+.iconbtn.is-active{
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.30);
+}
+
+/* ==========================
+   DROPDOWN (lista bonita)
+========================== */
+.dropdown{
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  transform: translateX(-50%) translateY(-8px);
+
+  width: min(640px, calc(100vw - 40px));
+  border-radius: 18px;
+  background: rgba(16,16,18,0.72);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+  overflow: hidden;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.dropdown.is-open{
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.dropdown-head{
+  padding: 12px 12px 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.dropdown-title{
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  font-size: 13px;
+  opacity: 0.92;
+}
+
+.dropdown-close{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.07);
+  color: #fff;
+  cursor: pointer;
+}
+
+.dropdown-list{
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.dropitem{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.dropitem:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.14);
+}
+
+.dropname{
+  color: #fff;
+  font-weight: 850;
+  font-size: 13px;
+  letter-spacing: 0.1px;
+}
+
+.dropmeta{
+  color: rgba(255,255,255,0.70);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+@media (max-width: 560px){
+  .dropdown{
+    width: calc(100vw - 28px);
+  }
+}
+
+/* ==========================
+   HOTSPOTS “GROUND BUTTONS”
+========================== */
+.pnlm-hotspot.ground {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  position: relative;
+  transform-origin: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pnlm-hotspot.ground::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.45);
+}
+
+.pnlm-hotspot.ground::after{
+  content: "";
+  position: absolute;
+  inset: -16px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,0.14), rgba(255,255,255,0) 60%);
+  opacity: 0.9;
+}
+
+.pnlm-hotspot.ground .g-ico{
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,0.95);
+  font-size: 16px;
+  font-weight: 900;
+  text-shadow: 0 10px 22px rgba(0,0,0,0.45);
+}
+
+.pnlm-hotspot.ground .g-label{
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  transform: translate(-50%, -100%);
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.65);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.pnlm-hotspot.ground:hover .g-label{
+  opacity: 1;
+  transform: translate(-50%, calc(-100% - 6px));
+}
+
+.pnlm-hotspot.ground.nav{
+  animation: floaty 1.9s ease-in-out infinite;
+}
+
+@keyframes floaty{
+  0%,100% { transform: translateY(0) scale(1); }
+  50%     { transform: translateY(-3px) scale(1.02); }
+}
+
+.pnlm-hotspot.ground:hover{
+  transform: translateY(-2px) scale(1.04);
+}
+
+.pnlm-hotspot.ground.info::after{
+  opacity: 0.55;
+}
+
+
+/* ==========================
+   TOP FADE (preset topo escurecido)
+========================== */
+.top-fade{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 140px;
+  z-index: 9997; /* abaixo da top-ui (9998) e acima do panorama */
+  pointer-events: none;
+
+  /* fade de preto para transparente */
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.72) 0%,
+    rgba(0,0,0,0.45) 35%,
+    rgba(0,0,0,0.12) 70%,
+    rgba(0,0,0,0) 100%
+  );
+}

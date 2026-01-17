@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>City 360 Tour</title>
+
+  <!-- Pannellum -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- INTRO IMAGE OVERLAY -->
+  <div id="introOverlay" class="intro-overlay" aria-hidden="false">
+    <div class="intro-image"></div>
+    <button id="skipIntro" class="skip-btn" type="button">Skip</button>
+  </div>
+
+  <!-- TOP UI -->
+  <header class="top-ui" aria-label="Navegação">
+    <div class="site-title" id="sceneTitle">Praça Central</div>
+
+    <nav class="iconbar" id="iconbar">
+      <button class="iconbtn" data-cat="igreja" aria-label="Igrejas" type="button">
+        <img src="images/icons/igreja.png" alt="">
+      </button>
+
+      <button class="iconbtn" data-cat="monumento" aria-label="Monumentos" type="button">
+        <img src="images/icons/monumento.png" alt="">
+      </button>
+
+      <button class="iconbtn" data-cat="comboio" aria-label="Comboio" type="button">
+        <img src="images/icons/comboio.png" alt="">
+      </button>
+
+      <button class="iconbtn" data-cat="camara" aria-label="Câmara Municipal" type="button">
+        <img src="images/icons/camaramunicipal.png" alt="">
+      </button>
+
+      <button class="iconbtn" data-cat="praia" aria-label="Praias" type="button">
+        <img src="images/icons/praia.png" alt="">
+      </button>
+
+      <!-- Dropdown -->
+      <div class="dropdown" id="dropdown" aria-hidden="true">
+        <div class="dropdown-head">
+          <div class="dropdown-title" id="dropdownTitle">Locais</div>
+          <button class="dropdown-close" id="dropdownClose" type="button" aria-label="Fechar">✕</button>
+        </div>
+        <div class="dropdown-list" id="dropdownList"></div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Viewer -->
+  <div id="panorama"></div>
+
+  <div class="top-fade" aria-hidden="true"></div>
+
+
+  <!-- Pannellum JS -->
+  <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+
+  <!-- App JS -->
+  <script src="app.js"></script>
+</body>
+</html>
