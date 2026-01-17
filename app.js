@@ -1,11 +1,13 @@
 /* ===============================
    Modern City 360 Tour (Pannellum)
-   ✅ Top icon menu (PNG) — HOVER abre dropdown (desktop)
+   ✅ Top icon menu hover abre dropdown (desktop)
    ✅ Mobile: click
    ✅ Scene title top-left
    ✅ Ground hotspots
    ✅ Intro zoom-out 5s + skip
    ✅ Hover-look delay 2s
+   ✅ Map modal + pins
+   ✅ Map button só aparece após a intro
 ================================ */
 
 const INTRO_DURATION_MS = 5000;
@@ -94,7 +96,7 @@ function hsNav(sceneId, label, icon = "➜") {
   };
 }
 
-function hsFocus(label, pitch, yaw, icon = "⦿") {
+function hsFocus(viewer, label, pitch, yaw, icon = "⦿") {
   return {
     type: "info",
     text: label,
@@ -113,13 +115,12 @@ function setSceneTitle(sceneId) {
   el.textContent = sceneTitles[sceneId] || "City 360 Tour";
 }
 
-function buildDropdown(catKey) {
-  const dd = document.getElementById("dropdown");
+function buildDropdown(catKey, viewer) {
   const ddTitle = document.getElementById("dropdownTitle");
   const ddList = document.getElementById("dropdownList");
   const cat = categories[catKey];
 
-  if (!dd || !ddTitle || !ddList || !cat) return;
+  if (!ddTitle || !ddList || !cat) return;
 
   ddTitle.textContent = cat.label;
   ddList.innerHTML = "";
@@ -139,11 +140,11 @@ function buildDropdown(catKey) {
   });
 }
 
-function openDropdown(catKey, btnToActivate) {
+function openDropdown(catKey, btnToActivate, viewer) {
   const dd = document.getElementById("dropdown");
   if (!dd) return;
 
-  buildDropdown(catKey);
+  buildDropdown(catKey, viewer);
   dd.classList.add("is-open");
   dd.setAttribute("aria-hidden", "false");
 
@@ -161,6 +162,62 @@ function closeDropdown() {
 }
 
 /* ===============================
+   MAP BUTTON — show/hide
+================================ */
+function showMapButton() {
+  const mapBtn = document.getElementById("mapBtn");
+  if (!mapBtn) return;
+  mapBtn.classList.remove("is-hidden");
+}
+
+function hideMapButton() {
+  const mapBtn = document.getElementById("mapBtn");
+  if (!mapBtn) return;
+  mapBtn.classList.add("is-hidden");
+}
+
+/* ===============================
+   MAP MODAL
+================================ */
+function initMapModal(viewer) {
+  const mapBtn = document.getElementById("mapBtn");
+  const mapModal = document.getElementById("mapModal");
+  const mapClose = document.getElementById("mapClose");
+  if (!mapBtn || !mapModal || !mapClose) return;
+
+  function openMap() {
+    mapModal.classList.add("is-open");
+    mapModal.setAttribute("aria-hidden", "false");
+    closeDropdown();
+  }
+
+  function closeMap() {
+    mapModal.classList.remove("is-open");
+    mapModal.setAttribute("aria-hidden", "true");
+  }
+
+  mapBtn.addEventListener("click", openMap);
+  mapClose.addEventListener("click", closeMap);
+
+  mapModal.addEventListener("click", (e) => {
+    if (e.target === mapModal) closeMap();
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMap();
+  });
+
+  mapModal.querySelectorAll(".pin").forEach(pin => {
+    pin.addEventListener("click", () => {
+      const scene = pin.dataset.scene;
+      if (!scene) return;
+      viewer.loadScene(scene);
+      closeMap();
+    });
+  });
+}
+
+/* ===============================
    INIT
 ================================ */
 window.addEventListener("load", () => {
@@ -169,7 +226,10 @@ window.addEventListener("load", () => {
 
   const isTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
 
-  // Viewer
+  // ❗ garantir que o mapa começa escondido
+  hideMapButton();
+
+  // Viewer (aqui crias o viewer e guardas globalmente)
   window.viewer = pannellum.viewer("panorama", {
     default: {
       firstScene: "praca",
@@ -187,8 +247,7 @@ window.addEventListener("load", () => {
         panorama: "images/img4.jpg",
         hfov: START_HFOV,
         hotSpots: [
-          { ...hsNav("museu", "Seguir", "➜"), pitch: -9, yaw: 70 },
-          { ...hsFocus("Ver detalhe", 8, 110, "⦿"), pitch: -6, yaw: 110 }
+          { ...hsNav("museu", "Seguir", "➜"), pitch: -9, yaw: 70 }
         ]
       },
       museu: {
@@ -197,8 +256,7 @@ window.addEventListener("load", () => {
         hfov: START_HFOV,
         hotSpots: [
           { ...hsNav("ponte", "Seguir", "➜"), pitch: -9, yaw: -120 },
-          { ...hsNav("praca", "Voltar", "←"), pitch: -9, yaw: 35 },
-          { ...hsFocus("Ver fachada", 5, 60, "⦿"), pitch: -6, yaw: 60 }
+          { ...hsNav("praca", "Voltar", "←"), pitch: -9, yaw: 35 }
         ]
       },
       ponte: {
@@ -206,8 +264,7 @@ window.addEventListener("load", () => {
         panorama: "images/img4.jpg",
         hfov: START_HFOV,
         hotSpots: [
-          { ...hsNav("miradouro", "Seguir", "➜"), pitch: -9, yaw: 175 },
-          { ...hsFocus("Ver rio", 0, -90, "⦿"), pitch: -6, yaw: -90 }
+          { ...hsNav("miradouro", "Seguir", "➜"), pitch: -9, yaw: 175 }
         ]
       },
       miradouro: {
@@ -215,23 +272,26 @@ window.addEventListener("load", () => {
         panorama: "images/img4.jpg",
         hfov: START_HFOV,
         hotSpots: [
-          { ...hsNav("ponte", "Voltar", "←"), pitch: -9, yaw: 0 },
-          { ...hsFocus("Ver skyline", 6, -140, "⦿"), pitch: -6, yaw: -140 }
+          { ...hsNav("ponte", "Voltar", "←"), pitch: -9, yaw: 0 }
         ]
       }
     }
   });
 
-  // título inicial + fechar dropdown ao mudar de cena
+  const viewer = window.viewer;
+
+  // ✅ exemplo de hotspot "focus" adicionado depois (usa addHotSpot)
+  viewer.addHotSpot(hsFocus(viewer, "Ver detalhe", 8, 110, "⦿"), "praca");
+
+  // título inicial
   setSceneTitle("praca");
+
   viewer.on("scenechange", (sceneId) => {
     setSceneTitle(sceneId);
     closeDropdown();
   });
 
-  /* ===============================
-     MENU: HOVER (desktop) / CLICK (mobile)
-  ================================ */
+  /* MENU HOVER/CLICK */
   const iconbar = document.getElementById("iconbar");
   const closeBtn = document.getElementById("dropdownClose");
   const dropdown = document.getElementById("dropdown");
@@ -252,24 +312,20 @@ window.addEventListener("load", () => {
 
   if (iconbar) {
     if (!isTouch) {
-      // DESKTOP: abre em hover
       iconbar.querySelectorAll(".iconbtn").forEach(btn => {
         btn.addEventListener("mouseenter", () => {
           cancelClose();
-          openDropdown(btn.dataset.cat, btn);
+          openDropdown(btn.dataset.cat, btn, viewer);
         });
       });
 
-      // se sair da barra, fecha com delay
       iconbar.addEventListener("mouseleave", scheduleClose);
 
-      // se entrar no dropdown, não fecha
       if (dropdown) {
         dropdown.addEventListener("mouseenter", cancelClose);
         dropdown.addEventListener("mouseleave", scheduleClose);
       }
     } else {
-      // MOBILE: click
       iconbar.addEventListener("click", (e) => {
         const btn = e.target.closest(".iconbtn");
         if (!btn) return;
@@ -277,24 +333,21 @@ window.addEventListener("load", () => {
         const ddOpen = dropdown?.classList.contains("is-open");
         const sameActive = btn.classList.contains("is-active");
 
-        if (ddOpen && sameActive) {
-          closeDropdown();
-        } else {
-          openDropdown(btn.dataset.cat, btn);
-        }
+        if (ddOpen && sameActive) closeDropdown();
+        else openDropdown(btn.dataset.cat, btn, viewer);
       });
     }
   }
 
-  // clicar fora fecha (desktop e mobile)
   document.addEventListener("click", (e) => {
     const inside = e.target.closest(".iconbar") || e.target.closest("#dropdown");
     if (!inside && dropdown?.classList.contains("is-open")) closeDropdown();
   });
 
-  /* ===============================
-     INTRO
-  ================================ */
+  /* MAP MODAL */
+  initMapModal(viewer);
+
+  /* INTRO */
   const overlay = document.getElementById("introOverlay");
   const skipBtn = document.getElementById("skipIntro");
   let done = false;
@@ -302,23 +355,24 @@ window.addEventListener("load", () => {
   function startTour() {
     if (done) return;
     done = true;
+
     if (overlay) {
       overlay.classList.add("is-hiding");
       setTimeout(() => overlay.remove(), 380);
     }
+
+    // ✅ Só quando entra no 360 é que aparece o botão mapa
+    showMapButton();
   }
 
   if (skipBtn) skipBtn.addEventListener("click", startTour);
   setTimeout(startTour, INTRO_DURATION_MS);
 
-  /* ===============================
-     HOVER LOOK (parallax) — desktop only
-  ================================ */
+  /* HOVER LOOK (desktop only) */
   if (isTouch) return;
 
   let baseYaw = 0, basePitch = 0;
   let targetYaw = 0, targetPitch = 0;
-
   let mouseInside = false;
   let isDragging = false;
   let hoverEnabled = true;
@@ -363,7 +417,6 @@ window.addEventListener("load", () => {
 
   document.addEventListener("mousemove", (e) => {
     const rect = panoEl.getBoundingClientRect();
-
     mouseInside =
       e.clientX >= rect.left && e.clientX <= rect.right &&
       e.clientY >= rect.top && e.clientY <= rect.bottom;
@@ -392,5 +445,6 @@ window.addEventListener("load", () => {
     }
     requestAnimationFrame(tick);
   }
+
   tick();
 });

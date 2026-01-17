@@ -1,22 +1,22 @@
-html, body {
+html, body{
   margin: 0;
   height: 100%;
   background: #000;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-#panorama {
+#panorama{
   width: 100%;
   height: 100vh;
   background: #000;
 }
 
 /* Remove UI Pannellum */
-.pnlm-about-msg { display: none !important; }
-.pnlm-load-box, .pnlm-lbar, .pnlm-lbar-fill, .pnlm-lmsg { display: none !important; }
+.pnlm-about-msg{ display:none !important; }
+.pnlm-load-box, .pnlm-lbar, .pnlm-lbar-fill, .pnlm-lmsg{ display:none !important; }
 
 /* ==========================
-   INTRO IMAGE ZOOM-OUT
+   INTRO IMAGE
 ========================== */
 .intro-overlay{
   position: fixed;
@@ -33,33 +33,52 @@ html, body {
   background-position: center;
   animation: zoomOut 5s ease forwards;
 }
-@keyframes zoomOut{
-  from{ transform: scale(1.12); }
-  to{ transform: scale(1); }
-}
+@keyframes zoomOut{ from{ transform:scale(1.12);} to{ transform:scale(1);} }
+
+/* ==========================
+   SKIP (melhor lettering, underline)
+========================== */
+/* ==========================
+   SKIP (melhor lettering, underline)
+========================== */
 .skip-btn{
   position: absolute;
   left: 50%;
   bottom: 26px;
   transform: translateX(-50%);
-  padding: 10px 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.55);
-  color: #fff;
-  font-weight: 800;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,0.92);
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  font-size: 14px;
   cursor: pointer;
-  backdrop-filter: blur(10px);
-}
-.skip-btn:hover{ background: rgba(0,0,0,0.75); }
-.intro-overlay.is-hiding{
-  opacity: 0;
-  transition: opacity 320ms ease;
-  pointer-events: none;
+  text-transform: uppercase;
+  text-shadow: 0 18px 40px rgba(0,0,0,0.55);
 }
 
+.skip-btn::after{
+  content:"";
+  display:block;
+  width: 58px;
+  height: 2px;
+  margin: 8px auto 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.78);
+  transform: scaleX(0.9);
+  transition: transform 180ms ease, opacity 180ms ease;
+  opacity: 0.85;
+}
+
+.skip-btn:hover::after{
+  transform: scaleX(1.05);
+  opacity: 1;
+}
+
+
 /* ==========================
-   TOP UI (moderno)
+   TOP UI
 ========================== */
 .top-ui{
   position: fixed;
@@ -70,16 +89,15 @@ html, body {
   pointer-events: none;
 }
 
-/* Nome do sítio (top-left) — sem caixa */
+/* Nome do local (sem caixa) */
 .site-title{
   position: absolute;
   left: 14px;
   top: 12px;
   pointer-events: none;
-  padding: 0;              /* ✅ sem caixa */
-  background: transparent; /* ✅ sem caixa */
-  border: 0;               /* ✅ sem caixa */
-  backdrop-filter: none;   /* ✅ sem blur */
+  padding: 0;
+  background: transparent;
+  border: 0;
   color: #fff;
   font-weight: 950;
   letter-spacing: 0.2px;
@@ -87,7 +105,33 @@ html, body {
   text-shadow: 0 18px 40px rgba(0,0,0,0.55);
 }
 
-/* Barra de ícones centrada MESMO no ecrã */
+/* Links topo-direita */
+.top-links{
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  display: inline-flex;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.top-link{
+  color: rgba(255,255,255,0.92);
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  text-shadow: 0 18px 40px rgba(0,0,0,0.55);
+  opacity: 0.9;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.top-link:hover{
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+/* Barra de ícones centrada */
 .iconbar{
   pointer-events: auto;
   position: absolute;
@@ -97,12 +141,7 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  border-radius: 18px;
   background: transparent;
-  border: 0;
-  padding: 0;
-  backdrop-filter: none;
 }
 
 /* Botões com PNG */
@@ -122,8 +161,6 @@ html, body {
   width: 22px;
   height: 22px;
   object-fit: contain;
-
-  /* ✅ força branco */
   filter: brightness(0) invert(1) drop-shadow(0 8px 14px rgba(0,0,0,0.5));
   opacity: 0.95;
 }
@@ -139,7 +176,7 @@ html, body {
 }
 
 /* ==========================
-   DROPDOWN (lista bonita)
+   DROPDOWN (centrado)
 ========================== */
 .dropdown{
   position: absolute;
@@ -231,101 +268,14 @@ html, body {
   font-weight: 650;
 }
 
-@media (max-width: 560px){
-  .dropdown{
-    width: calc(100vw - 28px);
-  }
+@media (max-width:560px){
+  .dropdown{ width: calc(100vw - 28px); }
+  .top-links{ gap: 10px; }
+  .top-link{ font-size: 12px; }
 }
 
 /* ==========================
-   HOTSPOTS “GROUND BUTTONS”
-========================== */
-.pnlm-hotspot.ground {
-  width: 42px;
-  height: 42px;
-  border-radius: 999px;
-  position: relative;
-  transform-origin: center;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.pnlm-hotspot.ground::before{
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
-  border: 1px solid rgba(255,255,255,0.14);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 18px 45px rgba(0,0,0,0.45);
-}
-
-.pnlm-hotspot.ground::after{
-  content: "";
-  position: absolute;
-  inset: -16px;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(255,255,255,0.14), rgba(255,255,255,0) 60%);
-  opacity: 0.9;
-}
-
-.pnlm-hotspot.ground .g-ico{
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: rgba(255,255,255,0.95);
-  font-size: 16px;
-  font-weight: 900;
-  text-shadow: 0 10px 22px rgba(0,0,0,0.45);
-}
-
-.pnlm-hotspot.ground .g-label{
-  position: absolute;
-  left: 50%;
-  top: -10px;
-  transform: translate(-50%, -100%);
-  padding: 8px 10px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.65);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  backdrop-filter: blur(10px);
-  transition: opacity 160ms ease, transform 160ms ease;
-}
-
-.pnlm-hotspot.ground:hover .g-label{
-  opacity: 1;
-  transform: translate(-50%, calc(-100% - 6px));
-}
-
-.pnlm-hotspot.ground.nav{
-  animation: floaty 1.9s ease-in-out infinite;
-}
-
-@keyframes floaty{
-  0%,100% { transform: translateY(0) scale(1); }
-  50%     { transform: translateY(-3px) scale(1.02); }
-}
-
-.pnlm-hotspot.ground:hover{
-  transform: translateY(-2px) scale(1.04);
-}
-
-.pnlm-hotspot.ground.info::after{
-  opacity: 0.55;
-}
-
-
-/* ==========================
-   TOP FADE (preset topo escurecido)
+   FADES (top + bottom)
 ========================== */
 .top-fade{
   position: fixed;
@@ -333,10 +283,8 @@ html, body {
   left: 0;
   right: 0;
   height: 140px;
-  z-index: 9997; /* abaixo da top-ui (9998) e acima do panorama */
+  z-index: 9997;
   pointer-events: none;
-
-  /* fade de preto para transparente */
   background: linear-gradient(
     to bottom,
     rgba(0,0,0,0.72) 0%,
@@ -344,4 +292,212 @@ html, body {
     rgba(0,0,0,0.12) 70%,
     rgba(0,0,0,0) 100%
   );
+}
+
+.bottom-fade{
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 160px;
+  z-index: 9997;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.70) 0%,
+    rgba(0,0,0,0.45) 35%,
+    rgba(0,0,0,0.12) 70%,
+    rgba(0,0,0,0) 100%
+  );
+}
+
+/* ==========================
+   MAP BUTTON (only icon)
+========================== */
+.map-btn{
+  position: fixed;
+  left: 14px;
+  bottom: 14px;
+  z-index: 9999;
+  padding: 0;
+  width: auto;
+  height: auto;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.95;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.map-btn:hover{
+  transform: translateY(-2px);
+  opacity: 1;
+}
+
+.map-btn.is-hidden{
+  display: none;
+}
+
+.map-icon{
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 10px 18px rgba(0,0,0,0.6));
+}
+
+.map-img{
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 10px 18px rgba(0,0,0,0.55));
+}
+
+/* hidden until intro ends */
+.map-btn.is-hidden{
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ==========================
+   MAP MODAL
+========================== */
+.map-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+.map-modal.is-open{
+  opacity: 1;
+  pointer-events: auto;
+}
+.map-panel{
+  width: min(980px, calc(100vw - 24px));
+  border-radius: 18px;
+  background: rgba(14,14,16,0.92);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+  overflow: hidden;
+  transform: translateY(8px);
+  transition: transform 180ms ease;
+}
+.map-modal.is-open .map-panel{ transform: translateY(0); }
+
+.map-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 12px 12px 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.map-title{
+  color:#fff;
+  font-weight:900;
+  font-size:13px;
+  letter-spacing:0.2px;
+  opacity:0.95;
+}
+.map-close{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.07);
+  color:#fff;
+  cursor:pointer;
+}
+
+.map-wrap{
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+.map-image{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Pins */
+.pin{
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.95);
+  background: rgba(255,255,255,0.18);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 16px 30px rgba(0,0,0,0.35);
+}
+.pin::after{
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 42px;
+  height: 42px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,0.18), rgba(255,255,255,0) 60%);
+  opacity: 0.9;
+}
+.pin:hover{
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.map-hint{
+  padding: 12px 14px 14px 14px;
+  color: rgba(255,255,255,0.78);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+
+/* ==========================
+   SOCIAL BAR (top-right)
+========================== */
+.socialbar{
+  position: absolute;
+  right: 14px;
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.socialbtn{
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.socialbtn img{
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 8px 14px rgba(0,0,0,0.5));
+  opacity: 0.95;
+}
+
+.socialbtn:hover{
+  transform: translateY(-1px) scale(1.03);
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.22);
 }

@@ -16,7 +16,7 @@
   <!-- INTRO IMAGE OVERLAY -->
   <div id="introOverlay" class="intro-overlay" aria-hidden="false">
     <div class="intro-image"></div>
-    <button id="skipIntro" class="skip-btn" type="button">Skip</button>
+    <button id="skipIntro" class="skip-btn" type="button">Saltar intro</button>
   </div>
 
   <!-- TOP UI -->
@@ -53,13 +53,62 @@
         <div class="dropdown-list" id="dropdownList"></div>
       </div>
     </nav>
+
+    <!-- SOCIALS (top-right) -->
+    <nav class="socialbar" aria-label="Redes sociais">
+      <a class="socialbtn" href="https://www.freguesia-famalicao.pt/" target="_blank" rel="noopener noreferrer" aria-label="Website">
+        <img src="images/icons/website.png" alt="">
+      </a>
+      <a class="socialbtn" href="https://www.facebook.com/freguesia.famalicao/mentions/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+        <img src="images/icons/facebook.png" alt="">
+      </a>
+      <a class="socialbtn" href="https://www.instagram.com/freguesia.famalicao/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+        <img src="images/icons/instagram.png" alt="">
+      </a>
+    </nav>
   </header>
 
   <!-- Viewer -->
   <div id="panorama"></div>
 
+  <!-- fades topo e fundo -->
   <div class="top-fade" aria-hidden="true"></div>
+  <div class="bottom-fade" aria-hidden="true"></div>
 
+  <!-- MAP BUTTON (bottom-left) -->
+  <button id="mapBtn" class="map-btn is-hidden" type="button" aria-label="Abrir mapa">
+    <img class="map-icon" src="images/icons/mapa.png" alt="">
+  </button>
+
+  <!-- MAP MODAL -->
+  <div id="mapModal" class="map-modal" aria-hidden="true">
+    <div class="map-panel" role="dialog" aria-modal="true" aria-label="Mapa">
+      <div class="map-head">
+        <div class="map-title">Mapa</div>
+        <button id="mapClose" class="map-close" type="button" aria-label="Fechar">✕</button>
+      </div>
+
+      <div class="map-wrap">
+        <img
+          id="mapImage"
+          class="map-image"
+          src="images/famalicaodrone.jpg"
+          alt="Mapa drone"
+          draggable="false"
+        />
+
+        <!-- PINS (posições em %) - ajusta left/top -->
+        <button class="pin" data-scene="praca" style="left: 46%; top: 58%;" type="button" aria-label="Praça"></button>
+        <button class="pin" data-scene="museu" style="left: 54%; top: 52%;" type="button" aria-label="Museu"></button>
+        <button class="pin" data-scene="ponte" style="left: 62%; top: 60%;" type="button" aria-label="Ponte"></button>
+        <button class="pin" data-scene="miradouro" style="left: 70%; top: 40%;" type="button" aria-label="Miradouro"></button>
+      </div>
+
+      <div class="map-hint">
+        Clica num pin para abrir a vista.
+      </div>
+    </div>
+  </div>
 
   <!-- Pannellum JS -->
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
