@@ -12,10 +12,17 @@
 const INTRO_DURATION_MS = 5000;
 const HOVER_DELAY_MS = 2000;
 
-const MIN_HFOV = 50;
+// FOV
+const MIN_HFOV = 40;
 const MAX_HFOV = 120;
-const START_HFOV = MAX_HFOV;
 
+// Desktop mantém mais aberto
+const START_HFOV_DESKTOP = 110;
+
+// Mobile começa mais “zoom”
+const START_HFOV_MOBILE = 75;
+
+// Hover-look (parallax) desktop
 const STRENGTH_YAW = 6;
 const STRENGTH_PITCH = 3.5;
 const SMOOTH = 0.12;
@@ -90,10 +97,14 @@ function buildDropdown(catKey, viewer) {
       <div class="dropname">${item.name}</div>
       <div class="dropmeta">${item.meta || ""}</div>
     `;
-    row.addEventListener("click", () => {
+
+    // ✅ pointerdown (mais "fácil" no mobile)
+    row.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
       closeDropdown();
       viewer.loadScene(item.sceneId);
     });
+
     ddList.appendChild(row);
   });
 }
@@ -123,12 +134,11 @@ function closeDropdown() {
 function setMobileMenuOpen(isOpen){
   const iconbar = document.getElementById("iconbar");
   if (!iconbar) return;
-  if (isOpen) iconbar.classList.add("is-open");
-  else iconbar.classList.remove("is-open");
+  iconbar.classList.toggle("is-open", !!isOpen);
 }
 
 /* ===============================
-   Map show/hide
+   Map/Gyro show/hide
 ================================ */
 function showMapButton() {
   const mapBtn = document.getElementById("mapBtn");
@@ -173,10 +183,17 @@ function initMapModal(viewer) {
     mapModal.setAttribute("aria-hidden", "true");
   }
 
-  mapBtn.addEventListener("click", openMap);
-  mapClose.addEventListener("click", closeMap);
+  mapBtn.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    openMap();
+  });
 
-  mapModal.addEventListener("click", (e) => {
+  mapClose.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    closeMap();
+  });
+
+  mapModal.addEventListener("pointerdown", (e) => {
     if (e.target === mapModal) closeMap();
   });
 
@@ -185,7 +202,8 @@ function initMapModal(viewer) {
   });
 
   mapModal.querySelectorAll(".pin").forEach(pin => {
-    pin.addEventListener("click", () => {
+    pin.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
       const scene = pin.dataset.scene;
       if (!scene) return;
       viewer.loadScene(scene);
@@ -196,13 +214,14 @@ function initMapModal(viewer) {
 
 /* ===============================
    MOBILE GYRO
+   - Só em largura mobile (<=900px)
 ================================ */
 function initMobileGyroToggle(viewer){
   const gyroBtn = document.getElementById("gyroBtn");
   if (!gyroBtn) return;
 
-  const isTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
-  if (!isTouch) return;
+  const isMobileWidth = window.matchMedia("(max-width: 900px)").matches;
+  if (!isMobileWidth) return;
 
   let enabled = false;
 
@@ -227,7 +246,9 @@ function initMobileGyroToggle(viewer){
     if (typeof viewer.setOrientation === "function") viewer.setOrientation(on);
   }
 
-  gyroBtn.addEventListener("click", async () => {
+  gyroBtn.addEventListener("pointerdown", async (e) => {
+    e.preventDefault();
+
     if (!enabled){
       const ok = await requestIOSPermissionIfNeeded();
       if (!ok){
@@ -235,9 +256,13 @@ function initMobileGyroToggle(viewer){
         return;
       }
     }
+
     enabled = !enabled;
     applyGyro(enabled);
+
+    // só um feedback subtil
     gyroBtn.style.transform = enabled ? "translateY(-2px) scale(1.06)" : "";
+    gyroBtn.style.opacity = enabled ? "1" : "0.92";
   });
 }
 
@@ -248,12 +273,20 @@ window.addEventListener("load", () => {
   const panoEl = document.getElementById("panorama");
   if (!panoEl || typeof pannellum === "undefined") return;
 
-  const isTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+  const isTouch =
+    ("ontouchstart" in window) ||
+    (navigator.maxTouchPoints > 0);
+
+  const isMobileWidth = window.matchMedia("(max-width: 900px)").matches;
+
+  // ✅ START_HFOV CORRETO (faltava no teu JS)
+  const START_HFOV = isMobileWidth ? START_HFOV_MOBILE : START_HFOV_DESKTOP;
 
   hideMapButton();
   hideGyroButton();
   setMobileMenuOpen(false);
 
+  // Viewer
   window.viewer = pannellum.viewer("panorama", {
     default: {
       firstScene: "praca",
@@ -307,10 +340,11 @@ window.addEventListener("load", () => {
   const viewer = window.viewer;
 
   setSceneTitle("praca");
+
   viewer.on("scenechange", (sceneId) => {
     setSceneTitle(sceneId);
     closeDropdown();
-    if (isTouch) setMobileMenuOpen(false);
+    if (isMobileWidth) setMobileMenuOpen(false);
   });
 
   /* ===============================
@@ -321,23 +355,31 @@ window.addEventListener("load", () => {
   const closeBtn = document.getElementById("dropdownClose");
   const mobileMenuBtn = document.getElementById("mobileMenuBtn");
 
-  if (closeBtn) closeBtn.addEventListener("click", closeDropdown);
+  if (closeBtn) {
+    closeBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      closeDropdown();
+    });
+  }
 
-  if (isTouch) {
+  if (isMobileWidth) {
     // mobile: botão abre/fecha iconbar
     if (mobileMenuBtn) {
-      mobileMenuBtn.addEventListener("click", () => {
+      mobileMenuBtn.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
         const openNow = iconbar?.classList.contains("is-open");
         closeDropdown();
         setMobileMenuOpen(!openNow);
       });
     }
 
-    // mobile: click no icon abre dropdown
+    // mobile: click/pointer em icon abre dropdown (mais tolerante)
     if (iconbar) {
-      iconbar.addEventListener("click", (e) => {
+      iconbar.addEventListener("pointerdown", (e) => {
         const btn = e.target.closest(".iconbtn");
         if (!btn) return;
+
+        e.preventDefault();
 
         const ddOpen = dropdown?.classList.contains("is-open");
         const sameActive = btn.classList.contains("is-active");
@@ -377,7 +419,7 @@ window.addEventListener("load", () => {
   }
 
   // click fora fecha dropdown e iconbar (mobile)
-  document.addEventListener("click", (e) => {
+  document.addEventListener("pointerdown", (e) => {
     const inside =
       e.target.closest(".iconbar") ||
       e.target.closest("#dropdown") ||
@@ -385,7 +427,7 @@ window.addEventListener("load", () => {
 
     if (!inside) {
       if (dropdown?.classList.contains("is-open")) closeDropdown();
-      if (isTouch) setMobileMenuOpen(false);
+      if (isMobileWidth) setMobileMenuOpen(false);
     }
   });
 
@@ -411,10 +453,16 @@ window.addEventListener("load", () => {
     }
 
     showMapButton();
-    if (isTouch) showGyroButton();
+    if (isMobileWidth) showGyroButton();
+    else hideGyroButton();
   }
 
-  if (skipBtn) skipBtn.addEventListener("click", startTour);
+  if (skipBtn) {
+    skipBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      startTour();
+    });
+  }
   setTimeout(startTour, INTRO_DURATION_MS);
 
   /* ===============================
@@ -425,7 +473,7 @@ window.addEventListener("load", () => {
   /* ===============================
      HOVER LOOK (desktop only)
   ================================ */
-  if (isTouch) return;
+  if (isTouch || isMobileWidth) return;
 
   let baseYaw = 0, basePitch = 0;
   let targetYaw = 0, targetPitch = 0;

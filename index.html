@@ -2,34 +2,58 @@
 <html lang="pt">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>City 360 Tour</title>
 
   <!-- Pannellum -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
+  />
 
-  <!-- CSS -->
+  <!-- App CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-  <!-- INTRO IMAGE OVERLAY -->
+
+  <!-- =========================
+       INTRO IMAGE OVERLAY
+  ========================== -->
   <div id="introOverlay" class="intro-overlay" aria-hidden="false">
     <div class="intro-image"></div>
-    <button id="skipIntro" class="skip-btn" type="button">Saltar intro</button>
+    <button id="skipIntro" class="skip-btn" type="button">
+      Saltar intro
+    </button>
   </div>
 
-  <!-- TOP UI -->
+  <!-- =========================
+       TOP UI
+  ========================== -->
   <header class="top-ui" aria-label="Navegação">
-    <div class="site-title" id="sceneTitle">Praça Central</div>
 
-    <!-- MOBILE MENU TOGGLE (hamburger diferente) -->
-    <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" aria-label="Abrir menu">
-      <span class="dots" aria-hidden="true"></span>
+    <!-- TÍTULO DO LOCAL -->
+    <div class="site-title" id="sceneTitle">
+      Praça Central
+    </div>
+
+    <!-- MOBILE MENU BUTTON (hamburger moderno – só mobile) -->
+    <button
+      id="mobileMenuBtn"
+      class="mobile-menu-btn"
+      type="button"
+      aria-label="Abrir menu de locais"
+    >
+      <span class="burger" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
     </button>
 
-    <!-- ICON BAR -->
+    <!-- ICON BAR (categorias) -->
     <nav class="iconbar" id="iconbar" aria-label="Categorias">
+
       <button class="iconbtn" data-cat="igreja" aria-label="Igrejas" type="button">
         <img src="images/icons/igreja.png" alt="">
       </button>
@@ -50,48 +74,96 @@
         <img src="images/icons/praia.png" alt="">
       </button>
 
-      <!-- Dropdown -->
+      <!-- DROPDOWN -->
       <div class="dropdown" id="dropdown" aria-hidden="true">
         <div class="dropdown-head">
           <div class="dropdown-title" id="dropdownTitle">Locais</div>
-          <button class="dropdown-close" id="dropdownClose" type="button" aria-label="Fechar">✕</button>
+          <button
+            class="dropdown-close"
+            id="dropdownClose"
+            type="button"
+            aria-label="Fechar"
+          >
+            ✕
+          </button>
         </div>
+
         <div class="dropdown-list" id="dropdownList"></div>
       </div>
     </nav>
 
-    <!-- SOCIALS -->
+    <!-- REDES SOCIAIS (desktop topo-direita / mobile lateral via CSS) -->
     <nav class="socialbar" aria-label="Redes sociais">
-      <a class="socialbtn" href="https://www.freguesia-famalicao.pt/" target="_blank" rel="noopener noreferrer" aria-label="Website">
+      <a
+        class="socialbtn"
+        href="https://www.freguesia-famalicao.pt/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Website"
+      >
         <img src="images/icons/website.png" alt="">
       </a>
-      <a class="socialbtn" href="https://www.facebook.com/freguesia.famalicao/mentions/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+
+      <a
+        class="socialbtn"
+        href="https://www.facebook.com/freguesia.famalicao/mentions/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Facebook"
+      >
         <img src="images/icons/facebook.png" alt="">
       </a>
-      <a class="socialbtn" href="https://www.instagram.com/freguesia.famalicao/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+
+      <a
+        class="socialbtn"
+        href="https://www.instagram.com/freguesia.famalicao/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Instagram"
+      >
         <img src="images/icons/instagram.png" alt="">
       </a>
     </nav>
+
   </header>
 
-  <!-- Viewer -->
+  <!-- =========================
+       PANORAMA VIEWER
+  ========================== -->
   <div id="panorama"></div>
 
   <!-- fades topo e fundo -->
   <div class="top-fade" aria-hidden="true"></div>
   <div class="bottom-fade" aria-hidden="true"></div>
 
-  <!-- MAP BUTTON (bottom-left) -->
-  <button id="mapBtn" class="map-btn is-hidden" type="button" aria-label="Abrir mapa">
+  <!-- =========================
+       MAP BUTTON (aparece após intro)
+  ========================== -->
+  <button
+    id="mapBtn"
+    class="map-btn is-hidden"
+    type="button"
+    aria-label="Abrir mapa"
+  >
     <img class="map-icon" src="images/icons/mapa.png" alt="">
   </button>
 
-  <!-- MAP MODAL -->
+  <!-- =========================
+       MAP MODAL
+  ========================== -->
   <div id="mapModal" class="map-modal" aria-hidden="true">
     <div class="map-panel" role="dialog" aria-modal="true" aria-label="Mapa">
+
       <div class="map-head">
         <div class="map-title">Mapa</div>
-        <button id="mapClose" class="map-close" type="button" aria-label="Fechar">✕</button>
+        <button
+          id="mapClose"
+          class="map-close"
+          type="button"
+          aria-label="Fechar"
+        >
+          ✕
+        </button>
       </div>
 
       <div class="map-wrap">
@@ -103,28 +175,41 @@
           draggable="false"
         />
 
-        <!-- PINS (posições em %) - ajusta left/top -->
-        <button class="pin" data-scene="praca" style="left: 46%; top: 58%;" type="button" aria-label="Praça"></button>
-        <button class="pin" data-scene="museu" style="left: 54%; top: 52%;" type="button" aria-label="Museu"></button>
-        <button class="pin" data-scene="ponte" style="left: 62%; top: 60%;" type="button" aria-label="Ponte"></button>
-        <button class="pin" data-scene="miradouro" style="left: 70%; top: 40%;" type="button" aria-label="Miradouro"></button>
+        <!-- PINS -->
+        <button class="pin" data-scene="praca" style="left:46%; top:58%;" aria-label="Praça"></button>
+        <button class="pin" data-scene="museu" style="left:54%; top:52%;" aria-label="Museu"></button>
+        <button class="pin" data-scene="ponte" style="left:62%; top:60%;" aria-label="Ponte"></button>
+        <button class="pin" data-scene="miradouro" style="left:70%; top:40%;" aria-label="Miradouro"></button>
       </div>
 
       <div class="map-hint">
         Clica num pin para abrir a vista.
       </div>
+
     </div>
   </div>
 
-  <!-- GYRO TOGGLE (mobile) -->
-  <button id="gyroBtn" class="gyro-btn is-hidden" type="button" aria-label="Ativar movimento">
-    <img class="gyro-icon" src="images/icons/telemovel.png" alt="">
+  <!-- =========================
+       GYRO BUTTON (mobile only)
+  ========================== -->
+  <button
+    id="gyroBtn"
+    class="gyro-btn is-hidden"
+    type="button"
+    aria-label="Ativar movimento"
+  >
+    <img
+      class="gyro-icon"
+      src="images/icons/telemovel.png"
+      alt=""
+    >
   </button>
 
-  <!-- Pannellum JS -->
+  <!-- =========================
+       SCRIPTS
+  ========================== -->
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-
-  <!-- App JS -->
   <script src="app.js"></script>
+
 </body>
 </html>

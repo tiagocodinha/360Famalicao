@@ -1,3 +1,6 @@
+/* ==========================
+   BASE
+========================== */
 html, body{
   margin: 0;
   height: 100%;
@@ -25,6 +28,7 @@ html, body{
   z-index: 9999;
   overflow: hidden;
 }
+
 .intro-image{
   width: 100%;
   height: 100%;
@@ -33,7 +37,11 @@ html, body{
   background-position: center;
   animation: zoomOut 5s ease forwards;
 }
-@keyframes zoomOut{ from{ transform:scale(1.12);} to{ transform:scale(1);} }
+
+@keyframes zoomOut{
+  from{ transform:scale(1.12); }
+  to{ transform:scale(1); }
+}
 
 .intro-overlay.is-hiding{
   opacity: 0;
@@ -60,6 +68,7 @@ html, body{
   text-transform: uppercase;
   text-shadow: 0 18px 40px rgba(0,0,0,0.55);
 }
+
 .skip-btn::after{
   content:"";
   display:block;
@@ -72,6 +81,7 @@ html, body{
   transition: transform 180ms ease, opacity 180ms ease;
   opacity: 0.85;
 }
+
 .skip-btn:hover::after{
   transform: scaleX(1.05);
   opacity: 1;
@@ -86,7 +96,7 @@ html, body{
   left: 14px;
   right: 14px;
   z-index: 9998;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 /* Nome do local */
@@ -105,9 +115,10 @@ html, body{
   text-shadow: 0 18px 40px rgba(0,0,0,0.55);
 }
 
-/* Barra de ícones (desktop centrado) */
+/* ==========================
+   ICON BAR (desktop centrado)
+========================== */
 .iconbar{
-  pointer-events: auto;
   position: absolute;
   left: 50%;
   top: 10px;
@@ -116,6 +127,7 @@ html, body{
   align-items: center;
   gap: 10px;
   background: transparent;
+  pointer-events: auto;
 }
 
 /* Botões com PNG */
@@ -130,6 +142,7 @@ html, body{
   place-items: center;
   transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }
+
 .iconbtn img{
   width: 22px;
   height: 22px;
@@ -137,11 +150,13 @@ html, body{
   filter: brightness(0) invert(1) drop-shadow(0 8px 14px rgba(0,0,0,0.5));
   opacity: 0.95;
 }
+
 .iconbtn:hover{
   transform: translateY(-1px) scale(1.03);
   background: rgba(255,255,255,0.10);
   border-color: rgba(255,255,255,0.22);
 }
+
 .iconbtn.is-active{
   background: rgba(255,255,255,0.14);
   border-color: rgba(255,255,255,0.30);
@@ -168,11 +183,13 @@ html, body{
   pointer-events: none;
   transition: opacity 180ms ease, transform 180ms ease;
 }
+
 .dropdown.is-open{
   opacity: 1;
   transform: translateX(-50%) translateY(0);
   pointer-events: auto;
 }
+
 .dropdown-head{
   padding: 12px 12px 10px 12px;
   display: flex;
@@ -181,6 +198,7 @@ html, body{
   gap: 10px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
+
 .dropdown-title{
   color: #fff;
   font-weight: 900;
@@ -188,6 +206,7 @@ html, body{
   font-size: 13px;
   opacity: 0.92;
 }
+
 .dropdown-close{
   width: 36px;
   height: 36px;
@@ -197,11 +216,13 @@ html, body{
   color: #fff;
   cursor: pointer;
 }
+
 .dropdown-list{
   padding: 10px;
   display: grid;
   gap: 8px;
 }
+
 .dropitem{
   display: flex;
   align-items: center;
@@ -214,17 +235,20 @@ html, body{
   cursor: pointer;
   transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }
+
 .dropitem:hover{
   transform: translateY(-1px);
   background: rgba(255,255,255,0.09);
   border-color: rgba(255,255,255,0.14);
 }
+
 .dropname{
   color: #fff;
   font-weight: 850;
   font-size: 13px;
   letter-spacing: 0.1px;
 }
+
 .dropmeta{
   color: rgba(255,255,255,0.70);
   font-size: 12px;
@@ -242,8 +266,15 @@ html, body{
   height: 140px;
   z-index: 9997;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0.12) 70%, rgba(0,0,0,0) 100%);
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.72) 0%,
+    rgba(0,0,0,0.45) 35%,
+    rgba(0,0,0,0.12) 70%,
+    rgba(0,0,0,0) 100%
+  );
 }
+
 .bottom-fade{
   position: fixed;
   bottom: 0;
@@ -252,7 +283,13 @@ html, body{
   height: 160px;
   z-index: 9997;
   pointer-events: none;
-  background: linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0.12) 70%, rgba(0,0,0,0) 100%);
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.70) 0%,
+    rgba(0,0,0,0.45) 35%,
+    rgba(0,0,0,0.12) 70%,
+    rgba(0,0,0,0) 100%
+  );
 }
 
 /* ==========================
@@ -270,11 +307,14 @@ html, body{
   opacity: 0.95;
   transition: transform 160ms ease, opacity 160ms ease;
 }
+
 .map-btn:hover{
   transform: translateY(-2px);
   opacity: 1;
 }
+
 .map-btn.is-hidden{ display: none; }
+
 .map-icon{
   width: 28px;
   height: 28px;
@@ -297,10 +337,12 @@ html, body{
   pointer-events: none;
   transition: opacity 180ms ease;
 }
+
 .map-modal.is-open{
   opacity: 1;
   pointer-events: auto;
 }
+
 .map-panel{
   width: min(980px, calc(100vw - 24px));
   border-radius: 18px;
@@ -311,7 +353,9 @@ html, body{
   transform: translateY(8px);
   transition: transform 180ms ease;
 }
+
 .map-modal.is-open .map-panel{ transform: translateY(0); }
+
 .map-head{
   display:flex;
   align-items:center;
@@ -319,6 +363,7 @@ html, body{
   padding: 12px 12px 10px 12px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
+
 .map-title{
   color:#fff;
   font-weight:900;
@@ -326,6 +371,7 @@ html, body{
   letter-spacing:0.2px;
   opacity:0.95;
 }
+
 .map-close{
   width: 36px;
   height: 36px;
@@ -335,12 +381,14 @@ html, body{
   color:#fff;
   cursor:pointer;
 }
+
 .map-wrap{
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #000;
 }
+
 .map-image{
   width: 100%;
   height: 100%;
@@ -348,6 +396,7 @@ html, body{
   user-select: none;
   pointer-events: none;
 }
+
 .pin{
   position: absolute;
   width: 18px;
@@ -359,6 +408,7 @@ html, body{
   transform: translate(-50%, -50%);
   box-shadow: 0 16px 30px rgba(0,0,0,0.35);
 }
+
 .pin::after{
   content: "";
   position: absolute;
@@ -371,9 +421,11 @@ html, body{
   background: radial-gradient(circle, rgba(255,255,255,0.18), rgba(255,255,255,0) 60%);
   opacity: 0.9;
 }
+
 .pin:hover{
   transform: translate(-50%, -50%) scale(1.08);
 }
+
 .map-hint{
   padding: 12px 14px 14px 14px;
   color: rgba(255,255,255,0.78);
@@ -393,6 +445,7 @@ html, body{
   gap: 10px;
   pointer-events: auto;
 }
+
 .socialbtn{
   width: 42px;
   height: 42px;
@@ -404,6 +457,7 @@ html, body{
   background: rgba(255,255,255,0.06);
   transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }
+
 .socialbtn img{
   width: 20px;
   height: 20px;
@@ -411,6 +465,7 @@ html, body{
   filter: brightness(0) invert(1) drop-shadow(0 8px 14px rgba(0,0,0,0.5));
   opacity: 0.95;
 }
+
 .socialbtn:hover{
   transform: translateY(-1px) scale(1.03);
   background: rgba(255,255,255,0.10);
@@ -431,12 +486,16 @@ html, body{
   cursor: pointer;
   opacity: 0.95;
   transition: transform 160ms ease, opacity 160ms ease;
+  display: none; /* só mobile */
 }
+
 .gyro-btn:hover{
   transform: translateY(-2px);
   opacity: 1;
 }
+
 .gyro-btn.is-hidden{ display:none; }
+
 .gyro-icon{
   width: 28px;
   height: 28px;
@@ -445,13 +504,14 @@ html, body{
 }
 
 /* ==========================
-   MOBILE MENU BTN (hamburger diferente)
+   MOBILE MENU BTN (hamburger moderno)
+   - Só mobile
+   - Encostado à direita
 ========================== */
 .mobile-menu-btn{
   position: absolute;
-  left: 50%;
-  top: 12px;
-  transform: translateX(-50%);
+  right: 14px;
+  top: 10px;
   width: 46px;
   height: 46px;
   border-radius: 999px;
@@ -461,21 +521,30 @@ html, body{
   pointer-events: auto;
   cursor: pointer;
   display: none; /* só mobile */
+  place-items: center;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }
-.mobile-menu-btn .dots{
+
+.mobile-menu-btn:hover{
+  transform: translateY(-1px) scale(1.03);
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.22);
+}
+
+/* Ícone hamburger */
+.mobile-menu-btn .burger{
   width: 18px;
-  height: 18px;
-  display: block;
-  background:
-    radial-gradient(circle, rgba(255,255,255,0.92) 2px, transparent 3px) 0 0/9px 9px,
-    radial-gradient(circle, rgba(255,255,255,0.92) 2px, transparent 3px) 50% 0/9px 9px,
-    radial-gradient(circle, rgba(255,255,255,0.92) 2px, transparent 3px) 100% 0/9px 9px,
-    radial-gradient(circle, rgba(255,255,255,0.92) 2px, transparent 3px) 0 50%/9px 9px,
-    radial-gradient(circle, rgba(255,255,255,0.92) 2px, transparent 3px) 50% 50%/9px 9px,
-    radial-gradient(circle, rgba(255,255,255,0.92) 2px, transparent 3px) 100% 50%/9px 9px,
-    radial-gradient(circle, rgba(255,255,255,0.92) 2px, transparent 3px) 0 100%/9px 9px,
-    radial-gradient(circle, rgba(255,255,255,0.92) 2px, transparent 3px) 50% 100%/9px 9px,
-    radial-gradient(circle, rgba(255,255,255,0.92) 2px, transparent 3px) 100% 100%/9px 9px;
+  height: 14px;
+  display: grid;
+  gap: 4px;
+}
+
+.mobile-menu-btn .burger span{
+  height: 2px;
+  width: 100%;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.35);
   opacity: 0.95;
 }
 
@@ -483,7 +552,71 @@ html, body{
    MOBILE OVERRIDES
 ========================== */
 @media (max-width: 900px){
-  /* socials vertical e centrado no lado direito */
+
+  /* ✅ SEM SCROLL em todo o mobile */
+  html, body{
+    height: 100%;
+    margin: 0;
+    overflow: hidden !important;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: auto;
+    touch-action: none; /* impede scroll/zoom por gesto */
+  }
+
+  body{
+    position: fixed;
+    inset: 0;
+    width: 100%;
+  }
+
+  #panorama{
+    height: 100dvh; /* ocupa ecrã real */
+  }
+
+  .intro-overlay{
+    height: 100dvh;
+  }
+
+  /* mostra hamburger e gyro em mobile */
+  .mobile-menu-btn{ display: grid; }
+  .gyro-btn{ display: block; }
+
+  /* no mobile: iconbar vira "menu" e abre/fecha */
+  .iconbar{
+    position: fixed;
+    right: 14px;
+    top: 68px;
+    left: auto;
+    transform: none;
+
+    padding: 10px 10px;
+    border-radius: 18px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(14px);
+
+    display: none; /* fechado */
+    gap: 10px;
+  }
+
+  .iconbar.is-open{
+    display: inline-flex;
+  }
+
+  /* dropdown no mobile fica mais perto do menu */
+  .dropdown{
+    left: auto;
+    right: 14px;
+    top: calc(100% + 10px);
+    transform: translateY(-8px);
+    width: min(560px, calc(100vw - 28px));
+  }
+
+  .dropdown.is-open{
+    transform: translateY(0);
+  }
+
+  /* socials: vertical no lado direito e centrado */
   .socialbar{
     position: fixed;
     right: 12px;
@@ -493,27 +626,25 @@ html, body{
     gap: 10px;
   }
 
-  /* mostra botão de menu e esconde iconbar por defeito */
-  .mobile-menu-btn{ display: grid; place-items:center; }
-
-  .iconbar{
-    top: 66px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 12px;
-    border-radius: 18px;
-    background: rgba(0,0,0,0.35);
-    border: 1px solid rgba(255,255,255,0.12);
-    backdrop-filter: blur(14px);
-    display: none; /* fechado */
+  /* evita overlap do social com hamburger */
+  .socialbar{
+    margin-top: 0;
   }
-  .iconbar.is-open{ display: inline-flex; }
 
-  /* FORÇAR TODOS OS ÍCONES A BRANCO (mobile) */
+  /* ✅ FORÇAR TODOS OS ÍCONES A BRANCO (mobile) */
   .iconbtn img,
   .socialbtn img,
   .map-icon,
   .gyro-icon{
     filter: brightness(0) invert(1) drop-shadow(0 10px 18px rgba(0,0,0,0.55)) !important;
   }
+}
+
+/* ==========================
+   DESKTOP CLEANUP
+========================== */
+@media (min-width: 901px){
+  /* esconder hamburger e gyro no desktop */
+  .mobile-menu-btn{ display: none !important; }
+  .gyro-btn{ display: none !important; }
 }
