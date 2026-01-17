@@ -34,41 +34,43 @@ const categories = {
   igreja: {
     label: "Igrejas",
     items: [
-      { name: "Igreja Matriz", sceneId: "praca", meta: "Centro" },
-      { name: "Capela Histórica", sceneId: "museu", meta: "Zona velha" }
+      { name: "Igreja de S. Gião", sceneId: "saogiao", meta: "Famalicão" },
+      { name: "Paróquia de Nossa Senhora da Vitória de Famalicão", sceneId: "paroquia", meta: "Famalicão" }
     ]
   },
   monumento: {
     label: "Monumentos",
     items: [
-      { name: "Monumento Principal", sceneId: "ponte", meta: "Ribeira" }
+      { name: "Monumento Almirante Tamandaré", sceneId: "almirante", meta: "Famalicão" }
     ]
   },
   comboio: {
-    label: "Comboio",
+    label: "Estação",
     items: [
-      { name: "Estação", sceneId: "museu", meta: "Transportes" }
+      { name: "Estação Ferroviária de Famalicão", sceneId: "estacao", meta: "Famalicão" }
     ]
   },
   camara: {
-    label: "Câmara Municipal",
+    label: "Junta",
     items: [
-      { name: "Paços do Concelho", sceneId: "praca", meta: "Institucional" }
+      { name: "Junta de Freguesia de Famalicão", sceneId: "junta", meta: "Famalicão" }
     ]
   },
   praia: {
     label: "Praias",
     items: [
-      { name: "Praia Central", sceneId: "miradouro", meta: "Mar" }
+      { name: "Praia do Salgado", sceneId: "salgado", meta: "Serra da Pescaria" }
     ]
   }
 };
 
 const sceneTitles = {
-  praca: "Praça Central",
-  museu: "Museu Municipal",
-  ponte: "Ponte Histórica",
-  miradouro: "Miradouro"
+  saogiao: "São Gião",
+  paroquia: "Paróquia de Nossa Senhora da Vitória de Famalicão",
+  almirante: "Monumento Almirante Tamandaré",
+  estacao: "Estação Ferroviária de Famalicão",
+  junta: "Junta de Freguesia de Famalicão",
+  salgado: "Praia do Salgado"
 };
 
 /* ===============================
@@ -77,7 +79,7 @@ const sceneTitles = {
 function setSceneTitle(sceneId) {
   const el = document.getElementById("sceneTitle");
   if (!el) return;
-  el.textContent = sceneTitles[sceneId] || "City 360 Tour";
+  el.textContent = sceneTitles[sceneId] || "Famalicão 360 Tour";
 }
 
 function buildDropdown(catKey, viewer) {
@@ -289,7 +291,7 @@ window.addEventListener("load", () => {
   // Viewer
   window.viewer = pannellum.viewer("panorama", {
     default: {
-      firstScene: "praca",
+      firstScene: "paroquia",
       autoLoad: true,
       hfov: START_HFOV,
       minHfov: MIN_HFOV,
@@ -301,7 +303,7 @@ window.addEventListener("load", () => {
     },
 
     scenes: {
-      praca: {
+      saogiao: {
         type: "equirectangular",
         panorama: "images/img4.jpg",
         hfov: START_HFOV,
@@ -309,7 +311,31 @@ window.addEventListener("load", () => {
           { pitch: -9, yaw: 70, type: "scene", text: "Seguir", sceneId: "museu" }
         ]
       },
-      museu: {
+      paroquia: {
+        type: "equirectangular",
+        panorama: "images/img4.jpg",
+        hfov: START_HFOV,
+        hotSpots: [
+          { pitch: -9, yaw: 70, type: "scene", text: "Seguir", sceneId: "museu" }
+        ]
+      },
+      almirante: {
+        type: "equirectangular",
+        panorama: "images/img4.jpg",
+        hfov: START_HFOV,
+        hotSpots: [
+          { pitch: -9, yaw: 70, type: "scene", text: "Seguir", sceneId: "museu" }
+        ]
+      },
+      estacao: {
+        type: "equirectangular",
+        panorama: "images/img4.jpg",
+        hfov: START_HFOV,
+        hotSpots: [
+          { pitch: -9, yaw: 70, type: "scene", text: "Seguir", sceneId: "museu" }
+        ]
+      },
+      junta: {
         type: "equirectangular",
         panorama: "images/img4.jpg",
         hfov: START_HFOV,
@@ -318,20 +344,12 @@ window.addEventListener("load", () => {
           { pitch: -9, yaw: 35, type: "scene", text: "Voltar", sceneId: "praca" }
         ]
       },
-      ponte: {
+      salgado: {
         type: "equirectangular",
         panorama: "images/img4.jpg",
         hfov: START_HFOV,
         hotSpots: [
-          { pitch: -9, yaw: 175, type: "scene", text: "Seguir", sceneId: "miradouro" }
-        ]
-      },
-      miradouro: {
-        type: "equirectangular",
-        panorama: "images/img4.jpg",
-        hfov: START_HFOV,
-        hotSpots: [
-          { pitch: -9, yaw: 0, type: "scene", text: "Voltar", sceneId: "ponte" }
+          { pitch: -9, yaw: 70, type: "scene", text: "Seguir", sceneId: "museu" }
         ]
       }
     }
