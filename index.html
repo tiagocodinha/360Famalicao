@@ -23,7 +23,13 @@
   <header class="top-ui" aria-label="Navegação">
     <div class="site-title" id="sceneTitle">Praça Central</div>
 
-    <nav class="iconbar" id="iconbar">
+    <!-- MOBILE MENU TOGGLE (hamburger diferente) -->
+    <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" aria-label="Abrir menu">
+      <span class="dots" aria-hidden="true"></span>
+    </button>
+
+    <!-- ICON BAR -->
+    <nav class="iconbar" id="iconbar" aria-label="Categorias">
       <button class="iconbtn" data-cat="igreja" aria-label="Igrejas" type="button">
         <img src="images/icons/igreja.png" alt="">
       </button>
@@ -54,7 +60,7 @@
       </div>
     </nav>
 
-    <!-- SOCIALS (top-right) -->
+    <!-- SOCIALS -->
     <nav class="socialbar" aria-label="Redes sociais">
       <a class="socialbtn" href="https://www.freguesia-famalicao.pt/" target="_blank" rel="noopener noreferrer" aria-label="Website">
         <img src="images/icons/website.png" alt="">
@@ -109,6 +115,11 @@
       </div>
     </div>
   </div>
+
+  <!-- GYRO TOGGLE (mobile) -->
+  <button id="gyroBtn" class="gyro-btn is-hidden" type="button" aria-label="Ativar movimento">
+    <img class="gyro-icon" src="images/icons/telemovel.png" alt="">
+  </button>
 
   <!-- Pannellum JS -->
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>

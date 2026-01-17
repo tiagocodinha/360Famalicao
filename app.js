@@ -1,30 +1,27 @@
 /* ===============================
    Modern City 360 Tour (Pannellum)
-   ✅ Top icon menu hover abre dropdown (desktop)
-   ✅ Mobile: click
+   ✅ Desktop: hover icon -> dropdown
+   ✅ Mobile: botão abre iconbar + click abre dropdown
    ✅ Scene title top-left
-   ✅ Ground hotspots
    ✅ Intro zoom-out 5s + skip
-   ✅ Hover-look delay 2s
+   ✅ Hover-look delay 2s (desktop)
    ✅ Map modal + pins
-   ✅ Map button só aparece após a intro
+   ✅ Map + Gyro só aparecem após intro
 ================================ */
 
 const INTRO_DURATION_MS = 5000;
 const HOVER_DELAY_MS = 2000;
 
-// FOV (maior = mais zoom out)
 const MIN_HFOV = 50;
 const MAX_HFOV = 120;
 const START_HFOV = MAX_HFOV;
 
-// Hover-look (parallax)
 const STRENGTH_YAW = 6;
 const STRENGTH_PITCH = 3.5;
 const SMOOTH = 0.12;
 
 /* ===============================
-   CENAS + CATEGORIAS (menu)
+   CATEGORIAS
 ================================ */
 const categories = {
   igreja: {
@@ -60,7 +57,6 @@ const categories = {
   }
 };
 
-// Títulos por cena (top-left)
 const sceneTitles = {
   praca: "Praça Central",
   museu: "Museu Municipal",
@@ -69,45 +65,7 @@ const sceneTitles = {
 };
 
 /* ===============================
-   Ground hotspot helpers
-================================ */
-function createGroundHotspot(div, { icon = "➜", label = "Ir", variant = "nav" } = {}) {
-  div.classList.add("ground", variant);
-
-  const ico = document.createElement("div");
-  ico.className = "g-ico";
-  ico.textContent = icon;
-
-  const lab = document.createElement("div");
-  lab.className = "g-label";
-  lab.textContent = label;
-
-  div.appendChild(ico);
-  div.appendChild(lab);
-}
-
-function hsNav(sceneId, label, icon = "➜") {
-  return {
-    type: "scene",
-    sceneId,
-    text: label,
-    cssClass: "ground nav",
-    createTooltipFunc: (div) => createGroundHotspot(div, { icon, label, variant: "nav" })
-  };
-}
-
-function hsFocus(viewer, label, pitch, yaw, icon = "⦿") {
-  return {
-    type: "info",
-    text: label,
-    cssClass: "ground info",
-    createTooltipFunc: (div) => createGroundHotspot(div, { icon, label, variant: "info" }),
-    clickHandlerFunc: () => viewer.lookAt(pitch, yaw, viewer.getHfov(), 900)
-  };
-}
-
-/* ===============================
-   TOP MENU (dropdown)
+   Helpers UI
 ================================ */
 function setSceneTitle(sceneId) {
   const el = document.getElementById("sceneTitle");
@@ -161,19 +119,37 @@ function closeDropdown() {
   document.querySelectorAll(".iconbtn.is-active").forEach(b => b.classList.remove("is-active"));
 }
 
+/* iconbar mobile open/close */
+function setMobileMenuOpen(isOpen){
+  const iconbar = document.getElementById("iconbar");
+  if (!iconbar) return;
+  if (isOpen) iconbar.classList.add("is-open");
+  else iconbar.classList.remove("is-open");
+}
+
 /* ===============================
-   MAP BUTTON — show/hide
+   Map show/hide
 ================================ */
 function showMapButton() {
   const mapBtn = document.getElementById("mapBtn");
   if (!mapBtn) return;
   mapBtn.classList.remove("is-hidden");
 }
-
 function hideMapButton() {
   const mapBtn = document.getElementById("mapBtn");
   if (!mapBtn) return;
   mapBtn.classList.add("is-hidden");
+}
+
+function showGyroButton() {
+  const gyroBtn = document.getElementById("gyroBtn");
+  if (!gyroBtn) return;
+  gyroBtn.classList.remove("is-hidden");
+}
+function hideGyroButton() {
+  const gyroBtn = document.getElementById("gyroBtn");
+  if (!gyroBtn) return;
+  gyroBtn.classList.add("is-hidden");
 }
 
 /* ===============================
@@ -189,6 +165,7 @@ function initMapModal(viewer) {
     mapModal.classList.add("is-open");
     mapModal.setAttribute("aria-hidden", "false");
     closeDropdown();
+    setMobileMenuOpen(false);
   }
 
   function closeMap() {
@@ -218,6 +195,53 @@ function initMapModal(viewer) {
 }
 
 /* ===============================
+   MOBILE GYRO
+================================ */
+function initMobileGyroToggle(viewer){
+  const gyroBtn = document.getElementById("gyroBtn");
+  if (!gyroBtn) return;
+
+  const isTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+  if (!isTouch) return;
+
+  let enabled = false;
+
+  async function requestIOSPermissionIfNeeded(){
+    const needs =
+      typeof DeviceOrientationEvent !== "undefined" &&
+      typeof DeviceOrientationEvent.requestPermission === "function";
+
+    if (!needs) return true;
+
+    try{
+      const res = await DeviceOrientationEvent.requestPermission();
+      return res === "granted";
+    }catch(e){
+      return false;
+    }
+  }
+
+  function applyGyro(on){
+    if (on && typeof viewer.startOrientation === "function") viewer.startOrientation();
+    if (!on && typeof viewer.stopOrientation === "function") viewer.stopOrientation();
+    if (typeof viewer.setOrientation === "function") viewer.setOrientation(on);
+  }
+
+  gyroBtn.addEventListener("click", async () => {
+    if (!enabled){
+      const ok = await requestIOSPermissionIfNeeded();
+      if (!ok){
+        console.warn("Permissão de movimento não concedida no iOS.");
+        return;
+      }
+    }
+    enabled = !enabled;
+    applyGyro(enabled);
+    gyroBtn.style.transform = enabled ? "translateY(-2px) scale(1.06)" : "";
+  });
+}
+
+/* ===============================
    INIT
 ================================ */
 window.addEventListener("load", () => {
@@ -226,10 +250,10 @@ window.addEventListener("load", () => {
 
   const isTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
 
-  // ❗ garantir que o mapa começa escondido
   hideMapButton();
+  hideGyroButton();
+  setMobileMenuOpen(false);
 
-  // Viewer (aqui crias o viewer e guardas globalmente)
   window.viewer = pannellum.viewer("panorama", {
     default: {
       firstScene: "praca",
@@ -238,7 +262,9 @@ window.addEventListener("load", () => {
       minHfov: MIN_HFOV,
       maxHfov: MAX_HFOV,
       sceneFadeDuration: 900,
-      showControls: false
+      showControls: false,
+      orientationOnByDefault: false,
+      autoRotate: false
     },
 
     scenes: {
@@ -247,7 +273,7 @@ window.addEventListener("load", () => {
         panorama: "images/img4.jpg",
         hfov: START_HFOV,
         hotSpots: [
-          { ...hsNav("museu", "Seguir", "➜"), pitch: -9, yaw: 70 }
+          { pitch: -9, yaw: 70, type: "scene", text: "Seguir", sceneId: "museu" }
         ]
       },
       museu: {
@@ -255,8 +281,8 @@ window.addEventListener("load", () => {
         panorama: "images/img4.jpg",
         hfov: START_HFOV,
         hotSpots: [
-          { ...hsNav("ponte", "Seguir", "➜"), pitch: -9, yaw: -120 },
-          { ...hsNav("praca", "Voltar", "←"), pitch: -9, yaw: 35 }
+          { pitch: -9, yaw: -120, type: "scene", text: "Seguir", sceneId: "ponte" },
+          { pitch: -9, yaw: 35, type: "scene", text: "Voltar", sceneId: "praca" }
         ]
       },
       ponte: {
@@ -264,7 +290,7 @@ window.addEventListener("load", () => {
         panorama: "images/img4.jpg",
         hfov: START_HFOV,
         hotSpots: [
-          { ...hsNav("miradouro", "Seguir", "➜"), pitch: -9, yaw: 175 }
+          { pitch: -9, yaw: 175, type: "scene", text: "Seguir", sceneId: "miradouro" }
         ]
       },
       miradouro: {
@@ -272,7 +298,7 @@ window.addEventListener("load", () => {
         panorama: "images/img4.jpg",
         hfov: START_HFOV,
         hotSpots: [
-          { ...hsNav("ponte", "Voltar", "←"), pitch: -9, yaw: 0 }
+          { pitch: -9, yaw: 0, type: "scene", text: "Voltar", sceneId: "ponte" }
         ]
       }
     }
@@ -280,38 +306,60 @@ window.addEventListener("load", () => {
 
   const viewer = window.viewer;
 
-  // ✅ exemplo de hotspot "focus" adicionado depois (usa addHotSpot)
-  viewer.addHotSpot(hsFocus(viewer, "Ver detalhe", 8, 110, "⦿"), "praca");
-
-  // título inicial
   setSceneTitle("praca");
-
   viewer.on("scenechange", (sceneId) => {
     setSceneTitle(sceneId);
     closeDropdown();
+    if (isTouch) setMobileMenuOpen(false);
   });
 
-  /* MENU HOVER/CLICK */
+  /* ===============================
+     MENU: desktop hover / mobile click + hamburger
+  ================================ */
   const iconbar = document.getElementById("iconbar");
-  const closeBtn = document.getElementById("dropdownClose");
   const dropdown = document.getElementById("dropdown");
-
-  let closeTimer = null;
-
-  function scheduleClose() {
-    if (closeTimer) clearTimeout(closeTimer);
-    closeTimer = setTimeout(() => closeDropdown(), 180);
-  }
-
-  function cancelClose() {
-    if (closeTimer) clearTimeout(closeTimer);
-    closeTimer = null;
-  }
+  const closeBtn = document.getElementById("dropdownClose");
+  const mobileMenuBtn = document.getElementById("mobileMenuBtn");
 
   if (closeBtn) closeBtn.addEventListener("click", closeDropdown);
 
-  if (iconbar) {
-    if (!isTouch) {
+  if (isTouch) {
+    // mobile: botão abre/fecha iconbar
+    if (mobileMenuBtn) {
+      mobileMenuBtn.addEventListener("click", () => {
+        const openNow = iconbar?.classList.contains("is-open");
+        closeDropdown();
+        setMobileMenuOpen(!openNow);
+      });
+    }
+
+    // mobile: click no icon abre dropdown
+    if (iconbar) {
+      iconbar.addEventListener("click", (e) => {
+        const btn = e.target.closest(".iconbtn");
+        if (!btn) return;
+
+        const ddOpen = dropdown?.classList.contains("is-open");
+        const sameActive = btn.classList.contains("is-active");
+
+        if (ddOpen && sameActive) closeDropdown();
+        else openDropdown(btn.dataset.cat, btn, viewer);
+      });
+    }
+  } else {
+    // desktop: hover abre dropdown
+    let closeTimer = null;
+
+    const scheduleClose = () => {
+      if (closeTimer) clearTimeout(closeTimer);
+      closeTimer = setTimeout(() => closeDropdown(), 180);
+    };
+    const cancelClose = () => {
+      if (closeTimer) clearTimeout(closeTimer);
+      closeTimer = null;
+    };
+
+    if (iconbar) {
       iconbar.querySelectorAll(".iconbtn").forEach(btn => {
         btn.addEventListener("mouseenter", () => {
           cancelClose();
@@ -325,29 +373,30 @@ window.addEventListener("load", () => {
         dropdown.addEventListener("mouseenter", cancelClose);
         dropdown.addEventListener("mouseleave", scheduleClose);
       }
-    } else {
-      iconbar.addEventListener("click", (e) => {
-        const btn = e.target.closest(".iconbtn");
-        if (!btn) return;
-
-        const ddOpen = dropdown?.classList.contains("is-open");
-        const sameActive = btn.classList.contains("is-active");
-
-        if (ddOpen && sameActive) closeDropdown();
-        else openDropdown(btn.dataset.cat, btn, viewer);
-      });
     }
   }
 
+  // click fora fecha dropdown e iconbar (mobile)
   document.addEventListener("click", (e) => {
-    const inside = e.target.closest(".iconbar") || e.target.closest("#dropdown");
-    if (!inside && dropdown?.classList.contains("is-open")) closeDropdown();
+    const inside =
+      e.target.closest(".iconbar") ||
+      e.target.closest("#dropdown") ||
+      e.target.closest("#mobileMenuBtn");
+
+    if (!inside) {
+      if (dropdown?.classList.contains("is-open")) closeDropdown();
+      if (isTouch) setMobileMenuOpen(false);
+    }
   });
 
-  /* MAP MODAL */
+  /* ===============================
+     MAP
+  ================================ */
   initMapModal(viewer);
 
-  /* INTRO */
+  /* ===============================
+     INTRO
+  ================================ */
   const overlay = document.getElementById("introOverlay");
   const skipBtn = document.getElementById("skipIntro");
   let done = false;
@@ -361,14 +410,21 @@ window.addEventListener("load", () => {
       setTimeout(() => overlay.remove(), 380);
     }
 
-    // ✅ Só quando entra no 360 é que aparece o botão mapa
     showMapButton();
+    if (isTouch) showGyroButton();
   }
 
   if (skipBtn) skipBtn.addEventListener("click", startTour);
   setTimeout(startTour, INTRO_DURATION_MS);
 
-  /* HOVER LOOK (desktop only) */
+  /* ===============================
+     MOBILE GYRO
+  ================================ */
+  initMobileGyroToggle(viewer);
+
+  /* ===============================
+     HOVER LOOK (desktop only)
+  ================================ */
   if (isTouch) return;
 
   let baseYaw = 0, basePitch = 0;
