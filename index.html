@@ -37,7 +37,7 @@
       Praça Central
     </div>
 
-    <!-- MOBILE MENU BUTTON (hamburger moderno – só mobile) -->
+    <!-- MOBILE MENU BUTTON -->
     <button
       id="mobileMenuBtn"
       class="mobile-menu-btn"
@@ -51,7 +51,7 @@
       </span>
     </button>
 
-    <!-- ICON BAR (categorias) -->
+    <!-- ICON BAR -->
     <nav class="iconbar" id="iconbar" aria-label="Categorias">
 
       <button class="iconbtn" data-cat="igreja" aria-label="Igrejas" type="button">
@@ -92,7 +92,7 @@
       </div>
     </nav>
 
-    <!-- REDES SOCIAIS (desktop topo-direita / mobile lateral via CSS) -->
+    <!-- REDES SOCIAIS -->
     <nav class="socialbar" aria-label="Redes sociais">
       <a
         class="socialbtn"
@@ -137,6 +137,11 @@
   <div class="bottom-fade" aria-hidden="true"></div>
 
   <!-- =========================
+       TIMELINE (desktop only) - só dots, centrada
+  ========================== -->
+  <nav id="timeline" class="timeline" aria-label="Timeline da tour"></nav>
+
+  <!-- =========================
        MAP BUTTON (aparece após intro)
   ========================== -->
   <button
@@ -175,11 +180,11 @@
           draggable="false"
         />
 
-        <!-- PINS -->
-        <button class="pin" data-scene="praca" style="left:46%; top:58%;" aria-label="Praça"></button>
-        <button class="pin" data-scene="museu" style="left:54%; top:52%;" aria-label="Museu"></button>
-        <button class="pin" data-scene="ponte" style="left:62%; top:60%;" aria-label="Ponte"></button>
-        <button class="pin" data-scene="miradouro" style="left:70%; top:40%;" aria-label="Miradouro"></button>
+        <!-- PINS (ajusta posições como quiseres) -->
+        <button class="pin" data-scene="paroquia" style="left:46%; top:58%;" aria-label="Paróquia"></button>
+        <button class="pin" data-scene="saogiao" style="left:54%; top:52%;" aria-label="São Gião"></button>
+        <button class="pin" data-scene="almirante" style="left:62%; top:60%;" aria-label="Monumento"></button>
+        <button class="pin" data-scene="estacao" style="left:70%; top:40%;" aria-label="Estação"></button>
       </div>
 
       <div class="map-hint">
