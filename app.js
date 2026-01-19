@@ -1,24 +1,25 @@
 /* ===============================
    Modern 360 Tour (Pannellum)
-   - Timeline só aparece após intro
-   - Hotspots: Círculo limpo
-   - Animação "Junta": Apenas Desktop (Mobile é estático e zoom normal)
+   - Correção do BUG da Intro
+   - Mobile: Sem animação, Zoom 60, Pitch 0
+   - Desktop: Animação de descida, Zoom 120
 ================================ */
 
 const INTRO_DURATION_MS = 5000;
 
-// Hover-look (parallax) desktop
+// Configurações de Animação (Apenas Desktop)
 const HOVER_DELAY_MS = 600;
 const STRENGTH_YAW   = 6;
 const STRENGTH_PITCH = 3.5;
 const SMOOTH         = 0.10;
 
-// FOV (Campo de Visão)
+// Configurações de FOV (Zoom)
 const MIN_HFOV = 40;
 const MAX_HFOV = 120;
 
-const START_HFOV_DESKTOP = MAX_HFOV; // 120 (Wide)
-const START_HFOV_MOBILE  = 60;       // <--- ALTERADO: 60 (Normal/Zoomed in)
+// Valores diferenciados
+const START_HFOV_DESKTOP = 120; // Grande angular
+const START_HFOV_MOBILE  = 60;  // Visão normal (mais zoom)
 
 /* ===============================
    DADOS / CONFIGURAÇÃO
@@ -61,6 +62,7 @@ const categories = {
 
 const sceneTitles = {
   saogiao: "Igreja de São Gião",
+  saogiao1: "Igreja de São Gião",
   igreja: "Paróquia de Nossa Senhora da Vitória de Famalicão",
   almirante: "Monumento Almirante Tamandaré",
   almirante1: "Monumento Almirante Tamandaré",
@@ -271,7 +273,7 @@ function initMobileGyroToggle(viewer){
 }
 
 /* ===============================
-   HOVER LOOK
+   HOVER LOOK (Desktop Only)
 ================================ */
 function initHoverLook(viewer, panoEl){
   const isMobileWidth = window.matchMedia("(max-width: 900px)").matches;
@@ -333,8 +335,16 @@ function initHoverLook(viewer, panoEl){
 window.addEventListener("load", () => {
   const panoEl = document.getElementById("panorama");
   if (!panoEl || typeof pannellum === "undefined") return;
-  const isMobileWidth = window.matchMedia("(max-width: 900px)").matches;
-  const START_HFOV = isMobileWidth ? START_HFOV_MOBILE : START_HFOV_DESKTOP;
+
+  // --- DETETAR MOBILE ANTES DE INICIAR ---
+  // Verifica se é mobile para definir configurações iniciais diferentes
+  const isMobileStart = window.matchMedia("(max-width: 900px)").matches;
+  
+  // Se for mobile, usa 60 (zoom normal). Se não, 120 (wide).
+  const START_HFOV = isMobileStart ? START_HFOV_MOBILE : START_HFOV_DESKTOP;
+  
+  // Se for mobile, a Junta começa em 0 (frente). Se não, 78 (cima) para animar.
+  const JUNTA_INITIAL_PITCH = isMobileStart ? 0 : 78;
 
   hideMapButton(); hideGyroButton(); setMobileMenuOpen(false);
 
@@ -342,31 +352,30 @@ window.addEventListener("load", () => {
   let animationRunning = false;
 
   function runDropAnimation() {
+    // PROTEÇÃO: Se for mobile, cancela imediatamente.
+    if (window.matchMedia("(max-width: 900px)").matches) return;
     if (animationRunning) return; 
     
-    // VERIFICAÇÃO EXTRA: Se for mobile, aborta
-    if (window.matchMedia("(max-width: 900px)").matches) return;
-
     animationRunning = true;
     const panoContainer = document.getElementById("panorama");
     
     // 1. Bloqueia interação
-    panoContainer.classList.add("is-locked");
+    if (panoContainer) panoContainer.classList.add("is-locked");
 
-    // 2. Define posição inicial
+    // 2. Define posição inicial (topo)
     window.viewer.setPitch(78);
 
-    // 3. Loop
+    // 3. Loop manual para garantir suavidade
     let currentPitch = 78;
     const targetPitch = 0;
     const speed = 2.0; 
 
     function step() {
-      // Se mudou de cena ou redimensionou para mobile, pára
+      // Se mudou de cena ou virou mobile, pára
       if(window.viewer.getScene() !== 'junta' || window.matchMedia("(max-width: 900px)").matches) {
-        panoContainer.classList.remove("is-locked");
+        if(panoContainer) panoContainer.classList.remove("is-locked");
         animationRunning = false;
-        // Se for mobile, garante que fica direito
+        // Garante horizonte se mobile
         if(window.matchMedia("(max-width: 900px)").matches) window.viewer.setPitch(0);
         return;
       }
@@ -375,7 +384,7 @@ window.addEventListener("load", () => {
 
       if (currentPitch <= targetPitch) {
         window.viewer.setPitch(targetPitch);
-        panoContainer.classList.remove("is-locked");
+        if(panoContainer) panoContainer.classList.remove("is-locked");
         animationRunning = false;
       } else {
         window.viewer.setPitch(currentPitch);
@@ -390,7 +399,9 @@ window.addEventListener("load", () => {
     default: {
       firstScene: "junta",
       autoLoad: true,
-      hfov: START_HFOV, minHfov: MIN_HFOV, maxHfov: MAX_HFOV,
+      hfov: START_HFOV, // Usa valor dinâmico
+      minHfov: MIN_HFOV, 
+      maxHfov: MAX_HFOV,
       sceneFadeDuration: 900,
       showControls: false, orientationOnByDefault: false, autoRotate: false
     },
@@ -399,7 +410,7 @@ window.addEventListener("load", () => {
         type: "equirectangular", 
         panorama: "images/junta.jpg", 
         hfov: START_HFOV,
-        pitch: 78,
+        pitch: JUNTA_INITIAL_PITCH, // <--- Usa valor dinâmico (0 no mobile, 78 no PC)
         yaw: -1,
         hotSpots: [{ pitch: -9, yaw: -171, type: "scene", sceneId: "centro", 
           createTooltipFunc: createStreetViewHotspot, 
@@ -544,10 +555,11 @@ window.addEventListener("load", () => {
 
     const isMobile = window.matchMedia("(max-width: 900px)").matches;
 
+    // Se estivermos a ir para a Junta
     if (sid === 'junta') {
       if (isMobile) {
-        // MOBILE: Força o horizonte imediatamente
-        window.viewer.setPitch(0);
+        // MOBILE: Força imediatamente 0 para evitar bugs
+        viewer.setPitch(0);
       } else {
         // DESKTOP: Se a intro já passou, anima
         if (introDone) setTimeout(runDropAnimation, 100);
@@ -560,10 +572,10 @@ window.addEventListener("load", () => {
     if(!e.altKey || !viewer.mouseEventToCoords) return;
     e.preventDefault();
     const [p, y] = viewer.mouseEventToCoords(e);
-    console.log(`Scene: ${viewer.getScene()} | Pitch: ${p.toFixed(2)}, Yaw: ${y.toFixed(2)}`);
+    console.log("Pitch: " + p + ", Yaw: " + y);
   }, true);
 
-  // Menus (Listeners iguais)
+  // Menus
   const iconbar = document.getElementById("iconbar");
   const dropdown = document.getElementById("dropdown");
   const closeBtn = document.getElementById("dropdownClose");
@@ -571,7 +583,7 @@ window.addEventListener("load", () => {
 
   if (closeBtn) closeBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); closeDropdown(); });
 
-  if (isMobileWidth) {
+  if (window.matchMedia("(max-width: 900px)").matches) {
     if (mobileMenuBtn) mobileMenuBtn.addEventListener("pointerdown", (e) => {
       e.preventDefault(); const open = iconbar?.classList.contains("is-open");
       closeDropdown(); setMobileMenuOpen(!open);
@@ -599,7 +611,7 @@ window.addEventListener("load", () => {
   document.addEventListener("pointerdown", (e) => {
     if(!e.target.closest(".iconbar") && !e.target.closest("#dropdown") && !e.target.closest("#mobileMenuBtn")){
       if(dropdown?.classList.contains("is-open")) closeDropdown();
-      if(isMobileWidth) setMobileMenuOpen(false);
+      if(window.matchMedia("(max-width: 900px)").matches) setMobileMenuOpen(false);
     }
   });
 
@@ -623,23 +635,21 @@ window.addEventListener("load", () => {
     
     // 2. Mostra UI
     showMapButton(); 
-    if(isMobileWidth) showGyroButton();
+    if(window.matchMedia("(max-width: 900px)").matches) showGyroButton();
     const timeline = document.getElementById("timeline");
     if(timeline) timeline.classList.add("is-visible");
 
-    // 3. LÓGICA DIFERENCIADA POR DISPOSITIVO
+    // 3. ANIMAÇÃO INICIAL (APENAS DESKTOP)
     if (window.viewer.getScene() === 'junta') {
       const isMobile = window.matchMedia("(max-width: 900px)").matches;
       
-      if (isMobile) {
-        // MOBILE: Não anima, mete logo no horizonte
-        window.viewer.setPitch(0);
-      } else {
-        // DESKTOP: Anima a descida
+      if (!isMobile) {
+        // DESKTOP: Espera que o overlay saia e anima
         setTimeout(() => {
           runDropAnimation();
         }, 450);
       }
+      // MOBILE: Não faz nada (já começou em 0)
     }
   }
   
