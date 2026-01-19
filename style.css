@@ -173,94 +173,157 @@ html, body{
 }
 
 /* ==========================
-   DROPDOWN
+   DROPDOWN (Estilo Moderno / Glass)
 ========================== */
-.dropdown{
+.dropdown {
   position: absolute;
   left: 50%;
-  top: calc(100% + 10px);
-  transform: translateX(-50%) translateY(-8px);
-  width: min(640px, calc(100vw - 40px));
-  border-radius: 18px;
-  background: rgba(16,16,18,0.72);
-  border: 1px solid rgba(255,255,255,0.12);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+  top: calc(100% + 14px);
+  transform: translateX(-50%) translateY(-10px);
+  width: min(500px, calc(100vw - 30px));
+  
+  /* Fundo vidro escuro e desfocado - Menos "Preto Sólido" */
+  background: rgba(20, 20, 25, 0.65); 
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 180ms ease, transform 180ms ease;
+  
+  transition: opacity 250ms ease, transform 250ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 }
 
-.dropdown.is-open{
+.dropdown.is-open {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
   pointer-events: auto;
 }
 
-.dropdown-head{
-  padding: 12px 12px 10px 12px;
+/* Cabeçalho do Dropdown */
+.dropdown-head {
+  padding: 14px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08); /* Linha subtil */
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.dropdown-title{
+.dropdown-title {
   color: #fff;
-  font-weight: 900;
-  letter-spacing: 0.2px;
-  font-size: 13px;
-  opacity: 0.92;
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-size: 11px;
+  text-transform: uppercase;
+  opacity: 0.7; /* Menos agressivo */
 }
 
-.dropdown-close{
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.07);
+.dropdown-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
   cursor: pointer;
-}
-
-.dropdown-list{
-  padding: 10px;
   display: grid;
-  gap: 8px;
+  place-items: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+  font-size: 12px;
 }
 
-.dropitem{
+.dropdown-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(90deg);
+}
+
+/* Lista de Itens */
+.dropdown-list {
+  padding: 5px 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 55vh; /* Limita altura se houver muitos itens */
+  overflow-y: auto; /* Scroll se necessário */
+}
+
+/* Scrollbar Bonita */
+.dropdown-list::-webkit-scrollbar {
+  width: 4px;
+}
+.dropdown-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dropdown-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+/* Item Individual - REMOVIDO O FUNDO PADRÃO */
+.dropitem {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.06);
+  padding: 12px 20px;
+  margin: 0;
+  border-radius: 0;
+  
+  /* Sem bordas ou fundos pesados */
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03); /* Separador muito subtil */
+  background: transparent;
+  
   cursor: pointer;
-  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+  transition: background 0.2s ease, padding-left 0.2s ease;
+  text-align: left;
 }
 
-.dropitem:hover{
-  transform: translateY(-1px);
-  background: rgba(255,255,255,0.09);
-  border-color: rgba(255,255,255,0.14);
+/* Último item sem linha */
+.dropitem:last-child {
+  border-bottom: none;
 }
 
-.dropname{
-  color: #fff;
-  font-weight: 850;
-  font-size: 13px;
-  letter-spacing: 0.1px;
+/* Efeito ao passar o rato (Hover) */
+.dropitem:hover {
+  background: rgba(255, 255, 255, 0.1); /* Ilumina ao passar o rato */
+  padding-left: 24px; /* Pequeno movimento para a direita */
 }
 
-.dropmeta{
-  color: rgba(255,255,255,0.70);
-  font-size: 12px;
-  font-weight: 650;
+.dropname {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+
+.dropmeta {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Ajuste Mobile */
+@media (max-width: 900px) {
+  .dropdown {
+    width: calc(100% - 28px); /* Largura quase total */
+    left: 50%;
+    top: auto;
+    bottom: 90px; /* Aparece de baixo no mobile */
+    transform: translateX(-50%) translateY(20px);
+  }
+  
+  .dropdown.is-open {
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 /* ==========================
