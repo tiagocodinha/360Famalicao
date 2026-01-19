@@ -1,23 +1,16 @@
 /* ===============================
    Modern 360 Tour (Pannellum)
-   - Desktop: Animação Junta, Timeline, Hover Menus, Zoom Wide
-   - Mobile: Botão Explorar (Categorias Deslizantes), Zoom Normal, Sem Animação
-   - Correção: Deteção de mobile antes do viewer iniciar
 ================================ */
 
 const INTRO_DURATION_MS = 5000;
-
-// Configurações
 const HOVER_DELAY_MS = 600;
 const STRENGTH_YAW   = 6;
 const STRENGTH_PITCH = 3.5;
 const SMOOTH         = 0.10;
-
-// FOV Settings
 const MIN_HFOV = 40;
 const MAX_HFOV = 120;
 const START_HFOV_DESKTOP = 120;
-const START_HFOV_MOBILE  = 60; // Vision Normal
+const START_HFOV_MOBILE  = 60; 
 
 /* ===============================
    DADOS / CONFIGURAÇÃO
@@ -103,8 +96,11 @@ function buildTimeline(viewer){
   if (!root) return;
   root.innerHTML = "";
   const track = document.createElement("div");
-  track.className = "timeline-track";
-  root.appendChild(track);
+  track.className = "timeline-track"; // Mantido por compatibilidade, mas o CSS trata direto
+  root.appendChild(track); // No CSS actual usamos o container direto, mas isto nao estraga.
+
+  // Limpa e usa o container direto para melhor controlo do gap
+  root.innerHTML = "";
 
   tourOrder.forEach((sceneId) => {
     const dot = document.createElement("button");
@@ -120,25 +116,22 @@ function buildTimeline(viewer){
       e.preventDefault();
       viewer.loadScene(sceneId);
     });
-    track.appendChild(dot);
+    root.appendChild(dot);
   });
 }
 
 function setTimelineActive(sceneId){
   const root = document.getElementById("timeline");
   if (!root) return;
-  
-  // Aliases para manter o ponto ativo nas cenas secundárias
   const aliases = { "almirante1": "almirante", "salgado1": "salgado", "saogiao1": "saogiao" };
   const targetId = aliases[sceneId] || sceneId;
-
   root.querySelectorAll(".tdot").forEach((b) => {
     b.classList.toggle("is-active", b.dataset.scene === targetId);
   });
 }
 
 /* ===============================
-   MENUS DESKTOP (Iconbar + Hover)
+   MENUS DESKTOP
 ================================ */
 let menuTimeout = null;
 
@@ -168,11 +161,9 @@ function openDropdown(catKey, btnToActivate, viewer) {
   if(menuTimeout) clearTimeout(menuTimeout);
   const dd = document.getElementById("dropdown");
   if (!dd) return;
-  
   buildDropdown(catKey, viewer);
   dd.classList.add("is-open");
   dd.setAttribute("aria-hidden", "false");
-
   document.querySelectorAll(".iconbtn.is-active").forEach(b => b.classList.remove("is-active"));
   if (btnToActivate) btnToActivate.classList.add("is-active");
 }
@@ -195,13 +186,12 @@ function cancelCloseDropdown() {
 }
 
 /* ===============================
-   MENU MOBILE (Explorar - Categorias)
+   MENU MOBILE (Explorar)
 ================================ */
 function initMobileCategoryMenu(viewer) {
   const centralBtn = document.getElementById("centralBtn");
   const modal = document.getElementById("mobileExplorerModal");
   const closeBtn = document.getElementById("explorerClose");
-  
   const catPrev = document.getElementById("catPrev");
   const catNext = document.getElementById("catNext");
   const catLabel = document.getElementById("catCurrentLabel");
@@ -215,11 +205,7 @@ function initMobileCategoryMenu(viewer) {
   function updateView() {
     const key = catKeys[curCatIdx];
     const catData = categories[key];
-    
-    // Atualiza Label
     catLabel.textContent = catData.label;
-    
-    // Atualiza Lista
     locList.innerHTML = "";
     catData.items.forEach(item => {
       const row = document.createElement("div");
@@ -251,7 +237,6 @@ function initMobileCategoryMenu(viewer) {
   centralBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); openModal(); });
   closeBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); closeModal(); });
   modal.addEventListener("pointerdown", (e) => { if(e.target === modal) closeModal(); });
-
   catNext.addEventListener("pointerdown", (e) => { e.preventDefault(); nextCat(); });
   catPrev.addEventListener("pointerdown", (e) => { e.preventDefault(); prevCat(); });
 }
@@ -294,32 +279,59 @@ function initMapModal(viewer) {
   });
 }
 
+// LÓGICA DO GYRO (Corrigida: desliga ao tocar na imagem)
 function initMobileGyroToggle(viewer){
   const gyroBtn = document.getElementById("gyroBtn");
-  if (!gyroBtn) return;
+  const panoEl = document.getElementById("panorama");
+  if (!gyroBtn || !panoEl) return;
   
   let enabled = false;
+
   async function requestIOSPermissionIfNeeded(){
     if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
       try{ return (await DeviceOrientationEvent.requestPermission()) === "granted"; } catch(e){ return false; }
     }
     return true;
   }
+
+  // Função para desligar o Gyro
+  function turnOffGyro() {
+    if (enabled && viewer.stopOrientation) {
+      enabled = false;
+      viewer.stopOrientation();
+      gyroBtn.style.opacity = "0.7";
+      gyroBtn.style.transform = "scale(1)";
+    }
+  }
+
+  // Click no botão
   gyroBtn.addEventListener("pointerdown", async (e) => {
     e.preventDefault();
-    if (!enabled && !(await requestIOSPermissionIfNeeded())) return;
-    enabled = !enabled;
-    if (enabled && viewer.startOrientation) viewer.startOrientation();
-    if (!enabled && viewer.stopOrientation) viewer.stopOrientation();
-    
-    gyroBtn.style.transform = enabled ? "scale(1.1)" : "scale(1)";
-    gyroBtn.style.opacity = enabled ? "1" : "0.7";
+    if (!enabled) {
+      // Tentar ligar
+      if (await requestIOSPermissionIfNeeded()) {
+        enabled = true;
+        if (viewer.startOrientation) viewer.startOrientation();
+        gyroBtn.style.opacity = "1";
+        gyroBtn.style.transform = "scale(1.1)";
+      }
+    } else {
+      // Desligar
+      turnOffGyro();
+    }
+  });
+
+  // Interromper Gyro se utilizador tocar na imagem
+  panoEl.addEventListener("pointerdown", () => {
+    if (enabled) {
+      turnOffGyro();
+    }
   });
 }
 
 function initHoverLook(viewer, panoEl){
-  // Apenas Desktop
-  if (window.matchMedia("(max-width: 900px)").matches) return;
+  const isMobile = window.matchMedia("(max-width: 900px)").matches;
+  if (isMobile) return;
 
   let enabled = false, hoverReadyTimer = null, isInteracting = false;
   let baseYaw = 0, basePitch = 0, targetYawOffset = 0, targetPitchOffset = 0;
@@ -373,17 +385,13 @@ window.addEventListener("load", () => {
   const panoEl = document.getElementById("panorama");
   if (!panoEl || typeof pannellum === "undefined") return;
 
-  // Deteção Mobile
   const isMobile = window.matchMedia("(max-width: 900px)").matches;
-  
-  // Define vars inicias baseadas no device
   const START_HFOV = isMobile ? START_HFOV_MOBILE : START_HFOV_DESKTOP;
-  // Mobile começa em 0 (frente), Desktop em 78 (topo) para animar
   const JUNTA_INITIAL_PITCH = isMobile ? 0 : 78;
 
   hideMapButton(); hideGyroButton(); closeDropdown();
 
-  // ANIMAÇÃO (Desktop Only)
+  // ANIMAÇÃO (Desktop)
   let animationRunning = false;
   function runDropAnimation() {
     if (window.matchMedia("(max-width: 900px)").matches) return;
@@ -418,7 +426,7 @@ window.addEventListener("load", () => {
     requestAnimationFrame(step);
   }
 
-  // CONFIG PANNELLUM
+  // PANNELLUM
   window.viewer = pannellum.viewer("panorama", {
     default: {
       firstScene: "junta",
@@ -510,26 +518,24 @@ window.addEventListener("load", () => {
     setTimelineActive(sid); 
     closeDropdown();
     
-    // Força reset para mobile ou animação para desktop
+    const mobile = window.matchMedia("(max-width: 900px)").matches;
+    
     if (sid === 'junta') {
-      if (window.matchMedia("(max-width: 900px)").matches) {
-        viewer.setPitch(0);
-      } else if (introDone) {
-        setTimeout(runDropAnimation, 100);
-      }
+      if (mobile) viewer.setPitch(0);
+      else if (introDone) setTimeout(runDropAnimation, 100);
     }
   });
 
-  // Hotspot Click info
+  // Hotspot Click
   panoEl.addEventListener("pointerdown", (e) => {
     if(e.altKey && viewer.mouseEventToCoords) {
       e.preventDefault();
       const [p, y] = viewer.mouseEventToCoords(e);
-      console.log("Pitch: " + p.toFixed(2) + ", Yaw: " + y.toFixed(2));
+      console.log("P: " + p.toFixed(2) + ", Y: " + y.toFixed(2));
     }
   }, true);
 
-  // --- MENU DESKTOP (Iconbar + Hover) ---
+  // --- MENU DESKTOP ---
   const iconbar = document.getElementById("iconbar");
   const dropdown = document.getElementById("dropdown");
   const closeBtn = document.getElementById("dropdownClose");
@@ -538,11 +544,9 @@ window.addEventListener("load", () => {
 
   if (iconbar) {
     iconbar.querySelectorAll(".iconbtn").forEach(btn => {
-      // Click (Touch/Hybrid)
+      // CLICK
       btn.addEventListener("pointerdown", (e) => {
-        // Se estiver em mobile, ignora (lá usamos a Box Gira)
-        if (window.matchMedia("(max-width: 900px)").matches) return; 
-        
+        if (window.matchMedia("(max-width: 900px)").matches) return;
         e.preventDefault();
         e.stopPropagation();
         if (dropdown && dropdown.classList.contains("is-open") && btn.classList.contains("is-active")) {
@@ -551,8 +555,7 @@ window.addEventListener("load", () => {
           openDropdown(btn.dataset.cat, btn, viewer);
         }
       });
-
-      // Hover (Desktop Only)
+      // HOVER
       btn.addEventListener("mouseenter", () => {
         if (!window.matchMedia("(max-width: 900px)").matches) {
           cancelCloseDropdown();
@@ -571,10 +574,9 @@ window.addEventListener("load", () => {
     }
   }
 
-  // --- MENU MOBILE (Grid Categorizada) ---
+  // --- MENU MOBILE ---
   initMobileCategoryMenu(viewer);
 
-  // Fechar ao clicar fora (Global)
   document.addEventListener("pointerdown", (e) => {
     if(!e.target.closest(".iconbar") && !e.target.closest("#dropdown") && !e.target.closest("#mobileExplorerModal") && !e.target.closest("#centralBtn")){
       if(dropdown && dropdown.classList.contains("is-open")) closeDropdown();
@@ -606,13 +608,15 @@ window.addEventListener("load", () => {
     const tl = document.getElementById("timeline");
     if(tl) tl.classList.add("is-visible");
 
-    // Animação apenas desktop
     if (viewer.getScene() === 'junta' && !window.matchMedia("(max-width: 900px)").matches) {
       setTimeout(() => runDropAnimation(), 450);
     }
   }
   
-  if(skipBtn) skipBtn.addEventListener("pointerdown", (e)=>{ e.preventDefault(); startTour(); });
+  if(skipBtn) skipBtn.addEventListener("pointerdown", (e)=>{ 
+    e.preventDefault(); 
+    startTour(); 
+  });
   
   setTimeout(startTour, INTRO_DURATION_MS);
 });
