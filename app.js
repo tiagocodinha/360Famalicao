@@ -2,7 +2,7 @@
    Modern 360 Tour (Pannellum)
    - Timeline só aparece após intro
    - Hotspots: Círculo limpo
-   - Animação "Junta": Bloqueio de interação + Descida forçada
+   - Animação "Junta": Apenas Desktop (Mobile é estático e zoom normal)
 ================================ */
 
 const INTRO_DURATION_MS = 5000;
@@ -13,11 +13,12 @@ const STRENGTH_YAW   = 6;
 const STRENGTH_PITCH = 3.5;
 const SMOOTH         = 0.10;
 
-// FOV
+// FOV (Campo de Visão)
 const MIN_HFOV = 40;
 const MAX_HFOV = 120;
-const START_HFOV_DESKTOP = MAX_HFOV;
-const START_HFOV_MOBILE  = MAX_HFOV;
+
+const START_HFOV_DESKTOP = MAX_HFOV; // 120 (Wide)
+const START_HFOV_MOBILE  = 60;       // <--- ALTERADO: 60 (Normal/Zoomed in)
 
 /* ===============================
    DADOS / CONFIGURAÇÃO
@@ -60,7 +61,6 @@ const categories = {
 
 const sceneTitles = {
   saogiao: "Igreja de São Gião",
-  saogiao1: "Igreja de São Gião",
   igreja: "Paróquia de Nossa Senhora da Vitória de Famalicão",
   almirante: "Monumento Almirante Tamandaré",
   almirante1: "Monumento Almirante Tamandaré",
@@ -136,17 +136,12 @@ function setTimelineActive(sceneId){
   const root = document.getElementById("timeline");
   if (!root) return;
 
-  // --- MAPA DE ASSOCIAÇÕES ---
-  // Aqui dizes: "Se estiver na scene X, ativa a bolinha Y"
   const aliases = {
     "almirante1": "almirante",
     "salgado1": "salgado",
     "saogiao1": "saogiao"
-    // Podes adicionar mais aqui, ex: "igreja_traseiras": "igreja"
   };
 
-  // Se a cena atual tiver um "pai" definido no mapa, usa o pai.
-  // Caso contrário, usa o próprio ID da cena.
   const targetId = aliases[sceneId] || sceneId;
 
   root.querySelectorAll(".tdot").forEach((b) => {
@@ -343,48 +338,50 @@ window.addEventListener("load", () => {
 
   hideMapButton(); hideGyroButton(); setMobileMenuOpen(false);
 
-  // --- LOGICA DE ANIMAÇÃO DA CÂMARA ---
+  // --- LOGICA DE ANIMAÇÃO DA CÂMARA (DESKTOP) ---
   let animationRunning = false;
 
   function runDropAnimation() {
-    if (animationRunning) return; // evita múltiplas chamadas
-    animationRunning = true;
+    if (animationRunning) return; 
+    
+    // VERIFICAÇÃO EXTRA: Se for mobile, aborta
+    if (window.matchMedia("(max-width: 900px)").matches) return;
 
+    animationRunning = true;
     const panoContainer = document.getElementById("panorama");
     
     // 1. Bloqueia interação
     panoContainer.classList.add("is-locked");
 
-    // 2. Define posição inicial (topo)
+    // 2. Define posição inicial
     window.viewer.setPitch(78);
 
-    // 3. Loop de animação manual (substitui lookAt nativo)
+    // 3. Loop
     let currentPitch = 78;
     const targetPitch = 0;
-    const speed = 2.0; // Velocidade da descida
+    const speed = 2.0; 
 
     function step() {
-      // Se o utilizador mudou de cena a meio, para tudo
-      if(window.viewer.getScene() !== 'junta') {
+      // Se mudou de cena ou redimensionou para mobile, pára
+      if(window.viewer.getScene() !== 'junta' || window.matchMedia("(max-width: 900px)").matches) {
         panoContainer.classList.remove("is-locked");
         animationRunning = false;
+        // Se for mobile, garante que fica direito
+        if(window.matchMedia("(max-width: 900px)").matches) window.viewer.setPitch(0);
         return;
       }
 
       currentPitch -= speed;
 
       if (currentPitch <= targetPitch) {
-        // FIM DA ANIMAÇÃO
         window.viewer.setPitch(targetPitch);
         panoContainer.classList.remove("is-locked");
         animationRunning = false;
       } else {
-        // CONTINUA A DESCER
         window.viewer.setPitch(currentPitch);
         requestAnimationFrame(step);
       }
     }
-
     requestAnimationFrame(step);
   }
 
@@ -426,39 +423,23 @@ window.addEventListener("load", () => {
           createTooltipFunc: createStreetViewHotspot, 
           createTooltipArgs: { sceneId: "almirante1" } 
         },
-          
-          { 
-            pitch: -16,   
-            yaw: 89, 
-            type: "scene", 
-            sceneId: "cemiterio", 
-            createTooltipFunc: createStreetViewHotspot, 
-            createTooltipArgs: { sceneId: "cemiterio" } 
-          }
-        ]
+        { pitch: -16, yaw: 89, type: "scene", sceneId: "cemiterio", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "cemiterio" } 
+        }]
       },
       almirante1: {
         type: "equirectangular", panorama: "images/patrimonio1.jpg", hfov: START_HFOV,
         pitch: 20,
         yaw: -2,
         hotSpots: [
-          // --- PRIMEIRO HOTSPOT ---
-          { 
-            pitch: -29, 
-            yaw: 176, 
-            type: "scene", 
-            sceneId: "almirante", 
+          { pitch: -29, yaw: 176, type: "scene", sceneId: "almirante", 
             createTooltipFunc: createStreetViewHotspot, 
             createTooltipArgs: { sceneId: "almirante" } 
           },
-          
-          { 
-            pitch: -11,   
-            yaw: 110, 
-            type: "scene", 
-            sceneId: "cemiterio", 
+          { pitch: -11, yaw: 110, type: "scene", sceneId: "estacao", 
             createTooltipFunc: createStreetViewHotspot, 
-            createTooltipArgs: { sceneId: "cemiterio" } 
+            createTooltipArgs: { sceneId: "estacao" } 
           }
         ]
       },
@@ -495,16 +476,10 @@ window.addEventListener("load", () => {
           createTooltipFunc: createStreetViewHotspot, 
           createTooltipArgs: { sceneId: "salgado1" } 
         },
-          
-        { 
-          pitch: -5,   
-          yaw: -15, 
-          type: "scene", 
-          sceneId: "saogiao", 
+        { pitch: -5, yaw: -15, type: "scene", sceneId: "saogiao", 
           createTooltipFunc: createStreetViewHotspot, 
           createTooltipArgs: { sceneId: "saogiao" } 
-        }
-      ]
+        }]
       },
       salgado1: {
         type: "equirectangular", panorama: "images/salgado2.jpg", hfov: START_HFOV,
@@ -514,16 +489,10 @@ window.addEventListener("load", () => {
           createTooltipFunc: createStreetViewHotspot, 
           createTooltipArgs: { sceneId: "saogiao" } 
         },
-          
-        { 
-          pitch: -30,   
-          yaw: -176, 
-          type: "scene", 
-          sceneId: "salgado", 
+        { pitch: -30, yaw: -176, type: "scene", sceneId: "salgado", 
           createTooltipFunc: createStreetViewHotspot, 
           createTooltipArgs: { sceneId: "salgado" } 
-        }
-      ]
+        }]
       },
       saogiao: {
         type: "equirectangular", panorama: "images/sgiao1.jpg", hfov: MAX_HFOV,
@@ -533,16 +502,10 @@ window.addEventListener("load", () => {
           createTooltipFunc: createStreetViewHotspot, 
           createTooltipArgs: { sceneId: "saogiao1" } 
         },
-          
-        { 
-          pitch: -12,   
-          yaw: -95, 
-          type: "scene", 
-          sceneId: "salgado1", 
+        { pitch: -12, yaw: -95, type: "scene", sceneId: "salgado1", 
           createTooltipFunc: createStreetViewHotspot, 
           createTooltipArgs: { sceneId: "salgado1" } 
-        }
-      ]
+        }]
       },
       saogiao1: {
         type: "equirectangular", panorama: "images/sgiao2.jpg", hfov: START_HFOV,
@@ -570,24 +533,29 @@ window.addEventListener("load", () => {
   buildTimeline(viewer);
   setTimelineActive(viewer.getScene());
 
-  // --- Lógica Intro Variables ---
   let introDone = false;
 
-  // EVENTO DE MUDANÇA DE CENA (Navegação normal entre hotspots)
+  // EVENTO DE MUDANÇA DE CENA
   viewer.on("scenechange", (sid) => {
     setSceneTitle(sid); 
     setTimelineActive(sid); 
     closeDropdown();
-    if (isMobileWidth) setMobileMenuOpen(false);
+    if (window.matchMedia("(max-width: 900px)").matches) setMobileMenuOpen(false);
 
-    // Se a navegação for para a junta E a intro já tiver acabado
-    if (sid === 'junta' && introDone) {
-      // Delay pequeno para garantir carregamento e depois anima
-      setTimeout(runDropAnimation, 100); 
+    const isMobile = window.matchMedia("(max-width: 900px)").matches;
+
+    if (sid === 'junta') {
+      if (isMobile) {
+        // MOBILE: Força o horizonte imediatamente
+        window.viewer.setPitch(0);
+      } else {
+        // DESKTOP: Se a intro já passou, anima
+        if (introDone) setTimeout(runDropAnimation, 100);
+      }
     }
   });
 
-  // Hotspot Picker (ALT+CLICK)
+  // Hotspot Picker
   panoEl.addEventListener("pointerdown", (e) => {
     if(!e.altKey || !viewer.mouseEventToCoords) return;
     e.preventDefault();
@@ -595,7 +563,7 @@ window.addEventListener("load", () => {
     console.log(`Scene: ${viewer.getScene()} | Pitch: ${p.toFixed(2)}, Yaw: ${y.toFixed(2)}`);
   }, true);
 
-  // Menus
+  // Menus (Listeners iguais)
   const iconbar = document.getElementById("iconbar");
   const dropdown = document.getElementById("dropdown");
   const closeBtn = document.getElementById("dropdownClose");
@@ -659,12 +627,19 @@ window.addEventListener("load", () => {
     const timeline = document.getElementById("timeline");
     if(timeline) timeline.classList.add("is-visible");
 
-    // 3. ANIMAÇÃO INICIAL
+    // 3. LÓGICA DIFERENCIADA POR DISPOSITIVO
     if (window.viewer.getScene() === 'junta') {
-      // Espera 450ms (tempo para o overlay desaparecer) antes de começar
-      setTimeout(() => {
-        runDropAnimation();
-      }, 450);
+      const isMobile = window.matchMedia("(max-width: 900px)").matches;
+      
+      if (isMobile) {
+        // MOBILE: Não anima, mete logo no horizonte
+        window.viewer.setPitch(0);
+      } else {
+        // DESKTOP: Anima a descida
+        setTimeout(() => {
+          runDropAnimation();
+        }, 450);
+      }
     }
   }
   
@@ -673,6 +648,5 @@ window.addEventListener("load", () => {
     startTour(); 
   });
   
-  // Timeout automático se ninguém clicar
   setTimeout(startTour, INTRO_DURATION_MS);
 });
