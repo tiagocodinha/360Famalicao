@@ -1,43 +1,33 @@
 /* ===============================
    Modern 360 Tour (Pannellum)
-   ✅ Desktop: hover icon -> dropdown
-   ✅ Mobile: hamburger abre iconbar + click abre dropdown
-   ✅ Scene title top-left
-   ✅ Intro zoom-out 5s + skip
-   ✅ Map modal + pins
-   ✅ Map + Gyro só aparecem após intro
-   ✅ Hotspots: StreetView style (ring + preview bubble)
-   ✅ Timeline: só dots centrados, sem box
-   ✅ ALT + clique: Hotspot picker (pitch/yaw)
-   ✅ Hover-look: sem clicar, mover rato mexe lentamente (desktop)
+   - Timeline só aparece após intro
+   - Hotspots: Círculo limpo
+   - Animação "Junta": Bloqueio de interação + Descida forçada
 ================================ */
 
 const INTRO_DURATION_MS = 5000;
 
 // Hover-look (parallax) desktop
-const HOVER_DELAY_MS = 600;     // começa rápido (podes subir p/ 2000 se quiseres)
-const STRENGTH_YAW   = 6;       // quanto mexe lateral
-const STRENGTH_PITCH = 3.5;     // quanto mexe vertical
-const SMOOTH         = 0.10;    // suavidade
+const HOVER_DELAY_MS = 600;
+const STRENGTH_YAW   = 6;
+const STRENGTH_PITCH = 3.5;
+const SMOOTH         = 0.10;
 
 // FOV
 const MIN_HFOV = 40;
 const MAX_HFOV = 120;
-
-// Desktop começa aberto
 const START_HFOV_DESKTOP = MAX_HFOV;
-// Mobile começa igual
 const START_HFOV_MOBILE  = MAX_HFOV;
 
 /* ===============================
-   CATEGORIAS
+   DADOS / CONFIGURAÇÃO
 ================================ */
 const categories = {
   igreja: {
     label: "Igrejas",
     items: [
-      { name: "Igreja de S. Gião", sceneId: "saogiao", meta: "Famalicão" },
-      { name: "Paróquia de Nossa Senhora da Vitória de Famalicão", sceneId: "paroquia", meta: "Famalicão" }
+      { name: "Paróquia de Nossa Senhora da Vitória", sceneId: "igreja", meta: "Famalicão" },
+      { name: "Igreja de S. Gião", sceneId: "saogiao", meta: "Famalicão" } 
     ]
   },
   monumento: {
@@ -49,13 +39,15 @@ const categories = {
   comboio: {
     label: "Estação",
     items: [
-      { name: "Estação Ferroviária de Famalicão", sceneId: "estacao", meta: "Famalicão" }
+      { name: "Estação Ferroviária", sceneId: "estacao", meta: "Famalicão" }
     ]
   },
-  camara: {
-    label: "Junta",
+  junta: {
+    label: "Institucional",
     items: [
-      { name: "Junta de Freguesia de Famalicão", sceneId: "junta", meta: "Famalicão" }
+      { name: "Junta de Freguesia", sceneId: "junta", meta: "Famalicão" },
+      { name: "Centro Social da Freguesia de Famalicão", sceneId: "centro", meta: "Famalicão" },
+      { name: "Cemitério de Famalicão", sceneId: "cemiterio", meta: "Famalicão" }
     ]
   },
   praia: {
@@ -67,40 +59,25 @@ const categories = {
 };
 
 const sceneTitles = {
-  saogiao: "São Gião",
-  paroquia: "Paróquia de Nossa Senhora da Vitória de Famalicão",
+  saogiao: "Igreja de São Gião",
+  saogiao1: "Igreja de São Gião",
+  igreja: "Paróquia de Nossa Senhora da Vitória de Famalicão",
   almirante: "Monumento Almirante Tamandaré",
+  almirante1: "Monumento Almirante Tamandaré",
+  centro: "Centro Social da Freguesia de Famalicão",
+  cemiterio: "Cemitério de Famalicão",
   estacao: "Estação Ferroviária de Famalicão",
   junta: "Junta de Freguesia de Famalicão",
-  salgado: "Praia do Salgado"
+  salgado: "Praia do Salgado",
+  salgado1: "Praia do Salgado"
 };
 
-/* ===============================
-   THUMBS (hotspots)
-================================ */
-const sceneThumbs = {
-  paroquia: "images/thumbs/paroquia.jpg",
-  saogiao: "images/thumbs/saogiao.jpg",
-  almirante: "images/thumbs/almirante.jpg",
-  estacao: "images/thumbs/estacao.jpg",
-  junta: "images/thumbs/junta.jpg",
-  salgado: "images/thumbs/salgado.jpg"
-};
-
-/* ===============================
-   ORDEM DA TOUR (timeline dots)
-================================ */
 const tourOrder = [
-  "paroquia",
-  "saogiao",
-  "almirante",
-  "estacao",
-  "junta",
-  "salgado"
+  "junta", "centro", "almirante", "cemiterio", "estacao", "igreja", "salgado", "saogiao"
 ];
 
 /* ===============================
-   Helpers UI
+   UI HELPERS
 ================================ */
 function setSceneTitle(sceneId) {
   const el = document.getElementById("sceneTitle");
@@ -109,96 +86,30 @@ function setSceneTitle(sceneId) {
 }
 
 /* ===============================
-   HOTSPOT STREET VIEW STYLE
-   - Desktop: hover mostra bolha, click navega
-   - Mobile: 1º toque abre bolha, 2º toque navega
-   args: { title, thumb, sceneId, viewer }
+   HOTSPOT: APENAS CÍRCULO SIMPLES
 ================================ */
-function createStreetViewHotspot(hotSpotDiv, args){
-  const { title, thumb, sceneId, viewer } = args || {};
-  if (!viewer || !sceneId) return;
-
+function createStreetViewHotspot(hotSpotDiv, args) {
+  const { sceneId, viewer } = args || {};
   hotSpotDiv.classList.add("hs-sv");
-
   const dot = document.createElement("div");
   dot.className = "hs-sv-dot";
   hotSpotDiv.appendChild(dot);
 
-  const bubble = document.createElement("div");
-  bubble.className = "hs-sv-bubble";
-  const thumbEl = document.createElement("div");
-  thumbEl.className = "hs-sv-thumb";
-  thumbEl.style.backgroundImage = thumb ? `url("${thumb}")` : "none";
-  bubble.appendChild(thumbEl);
-  hotSpotDiv.appendChild(bubble);
-
-  const label = document.createElement("div");
-  label.className = "hs-sv-label";
-  label.textContent = title || "";
-  hotSpotDiv.appendChild(label);
-
-  let armed = false;
-  let armTimer = null;
-
-  const open = () => {
-    hotSpotDiv.classList.add("is-open");
-  };
-  const close = () => {
-    hotSpotDiv.classList.remove("is-open");
-    armed = false;
-    if (armTimer) clearTimeout(armTimer);
-    armTimer = null;
-  };
-  const go = () => {
-    close();
-    viewer.loadScene(sceneId);
-  };
-
-  // Desktop hover
-  hotSpotDiv.addEventListener("mouseenter", open);
-  hotSpotDiv.addEventListener("mouseleave", close);
-
-  // Click desktop
   hotSpotDiv.addEventListener("pointerdown", (e) => {
-    // evita que o drag da câmara "roube" o clique
-    e.preventDefault();
     e.stopPropagation();
-    // Em touch queremos 2 passos (arma + executa)
-    if (e.pointerType === "touch") return;
-    go();
-  }, { capture: true });
-
-  // Touch: 1º toque abre, 2º toca navega
-  hotSpotDiv.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!armed) {
-      armed = true;
-      open();
-      armTimer = setTimeout(() => close(), 2500);
-    } else {
-      go();
+    if (viewer && sceneId) {
+      viewer.loadScene(sceneId);
     }
-  }, { passive: false });
-
-  // Se clicares noutra zona, fecha os que estão abertos
-  document.addEventListener("pointerdown", (e) => {
-    if (!hotSpotDiv.isConnected) return;
-    const inside = e.target && (e.target === hotSpotDiv || hotSpotDiv.contains(e.target));
-    if (!inside) close();
-  }, true);
+  });
 }
 
 /* ===============================
-   TIMELINE (só dots, centrada)
+   TIMELINE
 ================================ */
 function buildTimeline(viewer){
   const root = document.getElementById("timeline");
   if (!root) return;
-
   root.innerHTML = "";
-
   const track = document.createElement("div");
   track.className = "timeline-track";
   root.appendChild(track);
@@ -208,7 +119,6 @@ function buildTimeline(viewer){
     dot.type = "button";
     dot.className = "tdot";
     dot.dataset.scene = sceneId;
-
     const tip = document.createElement("div");
     tip.className = "ttip";
     tip.textContent = sceneTitles[sceneId] || sceneId;
@@ -218,7 +128,6 @@ function buildTimeline(viewer){
       e.preventDefault();
       viewer.loadScene(sceneId);
     });
-
     track.appendChild(dot);
   });
 }
@@ -227,19 +136,31 @@ function setTimelineActive(sceneId){
   const root = document.getElementById("timeline");
   if (!root) return;
 
+  // --- MAPA DE ASSOCIAÇÕES ---
+  // Aqui dizes: "Se estiver na scene X, ativa a bolinha Y"
+  const aliases = {
+    "almirante1": "almirante",
+    "salgado1": "salgado",
+    "saogiao1": "saogiao"
+    // Podes adicionar mais aqui, ex: "igreja_traseiras": "igreja"
+  };
+
+  // Se a cena atual tiver um "pai" definido no mapa, usa o pai.
+  // Caso contrário, usa o próprio ID da cena.
+  const targetId = aliases[sceneId] || sceneId;
+
   root.querySelectorAll(".tdot").forEach((b) => {
-    b.classList.toggle("is-active", b.dataset.scene === sceneId);
+    b.classList.toggle("is-active", b.dataset.scene === targetId);
   });
 }
 
 /* ===============================
-   DROPDOWN
+   MENUS & DROPDOWN
 ================================ */
 function buildDropdown(catKey, viewer) {
   const ddTitle = document.getElementById("dropdownTitle");
   const ddList = document.getElementById("dropdownList");
   const cat = categories[catKey];
-
   if (!ddTitle || !ddList || !cat) return;
 
   ddTitle.textContent = cat.label;
@@ -248,17 +169,12 @@ function buildDropdown(catKey, viewer) {
   cat.items.forEach((item) => {
     const row = document.createElement("div");
     row.className = "dropitem";
-    row.innerHTML = `
-      <div class="dropname">${item.name}</div>
-      <div class="dropmeta">${item.meta || ""}</div>
-    `;
-
+    row.innerHTML = `<div class="dropname">${item.name}</div><div class="dropmeta">${item.meta||""}</div>`;
     row.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       closeDropdown();
       viewer.loadScene(item.sceneId);
     });
-
     ddList.appendChild(row);
   });
 }
@@ -266,11 +182,9 @@ function buildDropdown(catKey, viewer) {
 function openDropdown(catKey, btnToActivate, viewer) {
   const dd = document.getElementById("dropdown");
   if (!dd) return;
-
   buildDropdown(catKey, viewer);
   dd.classList.add("is-open");
   dd.setAttribute("aria-hidden", "false");
-
   document.querySelectorAll(".iconbtn.is-active").forEach(b => b.classList.remove("is-active"));
   if (btnToActivate) btnToActivate.classList.add("is-active");
 }
@@ -278,13 +192,11 @@ function openDropdown(catKey, btnToActivate, viewer) {
 function closeDropdown() {
   const dd = document.getElementById("dropdown");
   if (!dd) return;
-
   dd.classList.remove("is-open");
   dd.setAttribute("aria-hidden", "true");
   document.querySelectorAll(".iconbtn.is-active").forEach(b => b.classList.remove("is-active"));
 }
 
-/* iconbar mobile open/close */
 function setMobileMenuOpen(isOpen){
   const iconbar = document.getElementById("iconbar");
   if (!iconbar) return;
@@ -292,32 +204,15 @@ function setMobileMenuOpen(isOpen){
 }
 
 /* ===============================
-   Map/Gyro show/hide
+   UI VISIBILITY
 ================================ */
-function showMapButton() {
-  const mapBtn = document.getElementById("mapBtn");
-  if (!mapBtn) return;
-  mapBtn.classList.remove("is-hidden");
-}
-function hideMapButton() {
-  const mapBtn = document.getElementById("mapBtn");
-  if (!mapBtn) return;
-  mapBtn.classList.add("is-hidden");
-}
-
-function showGyroButton() {
-  const gyroBtn = document.getElementById("gyroBtn");
-  if (!gyroBtn) return;
-  gyroBtn.classList.remove("is-hidden");
-}
-function hideGyroButton() {
-  const gyroBtn = document.getElementById("gyroBtn");
-  if (!gyroBtn) return;
-  gyroBtn.classList.add("is-hidden");
-}
+function showMapButton() { document.getElementById("mapBtn")?.classList.remove("is-hidden"); }
+function hideMapButton() { document.getElementById("mapBtn")?.classList.add("is-hidden"); }
+function showGyroButton() { document.getElementById("gyroBtn")?.classList.remove("is-hidden"); }
+function hideGyroButton() { document.getElementById("gyroBtn")?.classList.add("is-hidden"); }
 
 /* ===============================
-   MAP MODAL
+   MAPA MODAL
 ================================ */
 function initMapModal(viewer) {
   const mapBtn = document.getElementById("mapBtn");
@@ -331,562 +226,453 @@ function initMapModal(viewer) {
     closeDropdown();
     setMobileMenuOpen(false);
   }
-
   function closeMap() {
     mapModal.classList.remove("is-open");
     mapModal.setAttribute("aria-hidden", "true");
   }
 
-  mapBtn.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    openMap();
-  });
-
-  mapClose.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    closeMap();
-  });
-
-  mapModal.addEventListener("pointerdown", (e) => {
-    if (e.target === mapModal) closeMap();
-  });
-
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeMap();
-  });
+  mapBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); openMap(); });
+  mapClose.addEventListener("pointerdown", (e) => { e.preventDefault(); closeMap(); });
+  mapModal.addEventListener("pointerdown", (e) => { if (e.target === mapModal) closeMap(); });
+  window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMap(); });
 
   mapModal.querySelectorAll(".pin").forEach(pin => {
     pin.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       const scene = pin.dataset.scene;
-      if (!scene) return;
-      viewer.loadScene(scene);
-      closeMap();
+      if (scene) { viewer.loadScene(scene); closeMap(); }
     });
   });
 }
 
 /* ===============================
-   MOBILE GYRO
+   GYRO
 ================================ */
 function initMobileGyroToggle(viewer){
   const gyroBtn = document.getElementById("gyroBtn");
   if (!gyroBtn) return;
-
   const isMobileWidth = window.matchMedia("(max-width: 900px)").matches;
   if (!isMobileWidth) return;
 
   let enabled = false;
-
   async function requestIOSPermissionIfNeeded(){
-    const needs =
-      typeof DeviceOrientationEvent !== "undefined" &&
-      typeof DeviceOrientationEvent.requestPermission === "function";
-
-    if (!needs) return true;
-
-    try{
-      const res = await DeviceOrientationEvent.requestPermission();
-      return res === "granted";
-    }catch(e){
-      return false;
+    if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
+      try{ return (await DeviceOrientationEvent.requestPermission()) === "granted"; } catch(e){ return false; }
     }
+    return true;
   }
-
   function applyGyro(on){
-    if (on && typeof viewer.startOrientation === "function") viewer.startOrientation();
-    if (!on && typeof viewer.stopOrientation === "function") viewer.stopOrientation();
-    if (typeof viewer.setOrientation === "function") viewer.setOrientation(on);
+    if (on && viewer.startOrientation) viewer.startOrientation();
+    if (!on && viewer.stopOrientation) viewer.stopOrientation();
   }
-
   gyroBtn.addEventListener("pointerdown", async (e) => {
     e.preventDefault();
-
-    if (!enabled){
-      const ok = await requestIOSPermissionIfNeeded();
-      if (!ok){
-        console.warn("Permissão de movimento não concedida no iOS.");
-        return;
-      }
-    }
-
+    if (!enabled && !(await requestIOSPermissionIfNeeded())) return;
     enabled = !enabled;
     applyGyro(enabled);
-
     gyroBtn.style.transform = enabled ? "translateY(-2px) scale(1.06)" : "";
     gyroBtn.style.opacity = enabled ? "1" : "0.92";
   });
 }
 
 /* ===============================
-   HOVER-LOOK (desktop only)
-   Move lentamente com o rato sem clicar
+   HOVER LOOK
 ================================ */
 function initHoverLook(viewer, panoEl){
   const isMobileWidth = window.matchMedia("(max-width: 900px)").matches;
   const supportsHover = window.matchMedia("(hover: hover)").matches;
   if (isMobileWidth || !supportsHover) return;
 
-  let enabled = false;
-  let hoverReadyTimer = null;
-
-  let isInteracting = false;
-  let baseYaw = 0;
-  let basePitch = 0;
-
-  let targetYawOffset = 0;
-  let targetPitchOffset = 0;
+  let enabled = false, hoverReadyTimer = null, isInteracting = false;
+  let baseYaw = 0, basePitch = 0, targetYawOffset = 0, targetPitchOffset = 0;
 
   function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
-  function wrap180(a){
-    let x = a;
-    while (x > 180) x -= 360;
-    while (x < -180) x += 360;
-    return x;
-  }
-  function shortestAngleDiff(from, to){
-    return wrap180(to - from);
-  }
-
+  function wrap180(a){ let x=a; while(x>180)x-=360; while(x<-180)x+=360; return x; }
+  
   function syncBase(){
-    if (typeof viewer.getYaw === "function") baseYaw = viewer.getYaw();
-    if (typeof viewer.getPitch === "function") basePitch = viewer.getPitch();
+    if (viewer.getYaw) baseYaw = viewer.getYaw();
+    if (viewer.getPitch) basePitch = viewer.getPitch();
   }
 
-  function setOffsetsFromEvent(e){
+  function setOffsets(e){
     const r = panoEl.getBoundingClientRect();
-    const cx = r.left + r.width / 2;
-    const cy = r.top + r.height / 2;
-
-    const nx = (e.clientX - cx) / (r.width / 2);  // -1..1
-    const ny = (e.clientY - cy) / (r.height / 2); // -1..1
-
-    targetYawOffset   = clamp(nx, -1, 1) * STRENGTH_YAW;
+    const nx = (e.clientX - (r.left + r.width/2)) / (r.width/2);
+    const ny = (e.clientY - (r.top + r.height/2)) / (r.height/2);
+    targetYawOffset = clamp(nx, -1, 1) * STRENGTH_YAW;
     targetPitchOffset = clamp(ny, -1, 1) * STRENGTH_PITCH * -1;
   }
 
-  function enableAfterDelay(){
+  function enableLater(){
     if (hoverReadyTimer) clearTimeout(hoverReadyTimer);
-    hoverReadyTimer = setTimeout(() => {
-      enabled = true;
-      syncBase();
-    }, HOVER_DELAY_MS);
+    hoverReadyTimer = setTimeout(() => { enabled = true; syncBase(); }, HOVER_DELAY_MS);
   }
-
   function disable(){
-    enabled = false;
-    targetYawOffset = 0;
-    targetPitchOffset = 0;
+    enabled = false; targetYawOffset = 0; targetPitchOffset = 0;
     if (hoverReadyTimer) clearTimeout(hoverReadyTimer);
-    hoverReadyTimer = null;
   }
 
-  // Interação do utilizador: se está a arrastar, não mexemos
   panoEl.addEventListener("pointerdown", () => { isInteracting = true; disable(); }, true);
-  window.addEventListener("pointerup", () => {
-    if (!isInteracting) return;
-    isInteracting = false;
-    syncBase();
-    enableAfterDelay();
-  }, true);
+  window.addEventListener("pointerup", () => { if(isInteracting){ isInteracting=false; syncBase(); enableLater(); } }, true);
+  panoEl.addEventListener("wheel", () => { disable(); syncBase(); enableLater(); }, { passive: true });
+  panoEl.addEventListener("mousemove", (e) => { if(isInteracting)return; if(!enabled)enableLater(); setOffsets(e); });
+  panoEl.addEventListener("mouseenter", () => { if(!isInteracting)enableLater(); });
+  panoEl.addEventListener("mouseleave", () => { disable(); syncBase(); });
+  viewer.on("scenechange", () => { disable(); syncBase(); enableLater(); });
 
-  // se fizer scroll/zoom, também “reseta”
-  panoEl.addEventListener("wheel", () => { disable(); syncBase(); enableAfterDelay(); }, { passive: true });
-
-  // mouse move
-  panoEl.addEventListener("mousemove", (e) => {
-    if (isInteracting) return;
-    if (!enabled) enableAfterDelay();
-    setOffsetsFromEvent(e);
-  });
-
-  panoEl.addEventListener("mouseenter", () => {
-    if (isInteracting) return;
-    enableAfterDelay();
-  });
-
-  panoEl.addEventListener("mouseleave", () => {
-    disable();
-    syncBase();
-  });
-
-  // quando muda cena, re-baseia
-  viewer.on("scenechange", () => {
-    disable();
-    syncBase();
-    enableAfterDelay();
-  });
-
-  // loop suave
   function tick(){
-    if (enabled && !isInteracting){
-      const curYaw = viewer.getYaw();
-      const curPitch = viewer.getPitch();
-
-      const desiredYaw = baseYaw + targetYawOffset;
-      const desiredPitch = clamp(basePitch + targetPitchOffset, -85, 85);
-
-      const dy = shortestAngleDiff(curYaw, desiredYaw);
-      const dp = desiredPitch - curPitch;
-
-      const nextYaw = curYaw + dy * SMOOTH;
-      const nextPitch = curPitch + dp * SMOOTH;
-
+    if(enabled && !isInteracting){
+      const curYaw = viewer.getYaw(), curPitch = viewer.getPitch();
+      const nextYaw = curYaw + wrap180(baseYaw + targetYawOffset - curYaw) * SMOOTH;
+      const nextPitch = curPitch + (clamp(basePitch + targetPitchOffset, -85, 85) - curPitch) * SMOOTH;
       viewer.lookAt(nextPitch, nextYaw, viewer.getHfov(), false);
     }
-
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
-
-  // arranca
-  syncBase();
-  enableAfterDelay();
+  syncBase(); enableLater();
 }
 
 /* ===============================
-   INIT
+   INIT & MAIN
 ================================ */
 window.addEventListener("load", () => {
   const panoEl = document.getElementById("panorama");
   if (!panoEl || typeof pannellum === "undefined") return;
-
   const isMobileWidth = window.matchMedia("(max-width: 900px)").matches;
   const START_HFOV = isMobileWidth ? START_HFOV_MOBILE : START_HFOV_DESKTOP;
 
-  hideMapButton();
-  hideGyroButton();
-  setMobileMenuOpen(false);
+  hideMapButton(); hideGyroButton(); setMobileMenuOpen(false);
 
-  // Viewer
+  // --- LOGICA DE ANIMAÇÃO DA CÂMARA ---
+  let animationRunning = false;
+
+  function runDropAnimation() {
+    if (animationRunning) return; // evita múltiplas chamadas
+    animationRunning = true;
+
+    const panoContainer = document.getElementById("panorama");
+    
+    // 1. Bloqueia interação
+    panoContainer.classList.add("is-locked");
+
+    // 2. Define posição inicial (topo)
+    window.viewer.setPitch(78);
+
+    // 3. Loop de animação manual (substitui lookAt nativo)
+    let currentPitch = 78;
+    const targetPitch = 0;
+    const speed = 2.0; // Velocidade da descida
+
+    function step() {
+      // Se o utilizador mudou de cena a meio, para tudo
+      if(window.viewer.getScene() !== 'junta') {
+        panoContainer.classList.remove("is-locked");
+        animationRunning = false;
+        return;
+      }
+
+      currentPitch -= speed;
+
+      if (currentPitch <= targetPitch) {
+        // FIM DA ANIMAÇÃO
+        window.viewer.setPitch(targetPitch);
+        panoContainer.classList.remove("is-locked");
+        animationRunning = false;
+      } else {
+        // CONTINUA A DESCER
+        window.viewer.setPitch(currentPitch);
+        requestAnimationFrame(step);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  // Configuração do Pannellum
   window.viewer = pannellum.viewer("panorama", {
     default: {
-      firstScene: "paroquia",
+      firstScene: "junta",
       autoLoad: true,
-      hfov: START_HFOV,
-      minHfov: MIN_HFOV,
-      maxHfov: MAX_HFOV,
+      hfov: START_HFOV, minHfov: MIN_HFOV, maxHfov: MAX_HFOV,
       sceneFadeDuration: 900,
-      showControls: false,
-      orientationOnByDefault: false,
-      autoRotate: false
+      showControls: false, orientationOnByDefault: false, autoRotate: false
     },
-
     scenes: {
-      paroquia: {
-        type: "equirectangular",
-        panorama: "images/igreja1.jpg",
-        hfov: START_HFOV,
-        hotSpots: [
-          {
-            pitch: -9,
-            yaw: 70,
-            type: "scene",
-            sceneId: "saogiao",
-            createTooltipFunc: createStreetViewHotspot,
-            createTooltipArgs: {
-              title: sceneTitles.saogiao,
-              thumb: sceneThumbs.saogiao,
-              sceneId: "saogiao",
-              viewer: null // injetamos abaixo
-            }
-          }
-        ]
-      },
-
-      saogiao: {
-        type: "equirectangular",
-        panorama: "images/sgiao1.jpg",
-        hfov: MAX_HFOV,
-        yaw: 0,
-        pitch: 0,
-        hotSpots: [
-          {
-            pitch: -4.35,
-            yaw: 36.49,
-            type: "scene",
-            sceneId: "almirante",
-            createTooltipFunc: createStreetViewHotspot,
-            createTooltipArgs: {
-              title: sceneTitles.almirante,
-              thumb: sceneThumbs.almirante,
-              sceneId: "almirante",
-              viewer: null
-            }
-          }
-        ]
-      },
-
-      almirante: {
-        type: "equirectangular",
-        panorama: "images/patrimonio1.jpg",
-        hfov: START_HFOV,
-        hotSpots: [
-          {
-            pitch: -9,
-            yaw: 70,
-            type: "scene",
-            sceneId: "estacao",
-            createTooltipFunc: createStreetViewHotspot,
-            createTooltipArgs: {
-              title: sceneTitles.estacao,
-              thumb: sceneThumbs.estacao,
-              sceneId: "estacao",
-              viewer: null
-            }
-          }
-        ]
-      },
-
-      estacao: {
-        type: "equirectangular",
-        panorama: "images/estacao1.jpg",
-        hfov: START_HFOV,
-        hotSpots: [
-          {
-            pitch: -9,
-            yaw: 70,
-            type: "scene",
-            sceneId: "junta",
-            createTooltipFunc: createStreetViewHotspot,
-            createTooltipArgs: {
-              title: sceneTitles.junta,
-              thumb: sceneThumbs.junta,
-              sceneId: "junta",
-              viewer: null
-            }
-          }
-        ]
-      },
-
       junta: {
-        type: "equirectangular",
-        panorama: "images/junta.jpg",
+        type: "equirectangular", 
+        panorama: "images/junta.jpg", 
         hfov: START_HFOV,
-        hotSpots: [
-          {
-            pitch: -9,
-            yaw: -120,
-            type: "scene",
-            sceneId: "salgado",
-            createTooltipFunc: createStreetViewHotspot,
-            createTooltipArgs: {
-              title: sceneTitles.salgado,
-              thumb: sceneThumbs.salgado,
-              sceneId: "salgado",
-              viewer: null
-            }
-          },
-          {
-            pitch: -9,
-            yaw: 35,
-            type: "scene",
-            sceneId: "paroquia",
-            createTooltipFunc: createStreetViewHotspot,
-            createTooltipArgs: {
-              title: sceneTitles.paroquia,
-              thumb: sceneThumbs.paroquia,
-              sceneId: "paroquia",
-              viewer: null
-            }
+        pitch: 78,
+        yaw: -1,
+        hotSpots: [{ pitch: -9, yaw: -171, type: "scene", sceneId: "centro", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "centro" } 
+        }]
+      },
+      centro: {
+        type: "equirectangular", panorama: "images/centro.jpg", hfov: START_HFOV,
+        pitch: 0,
+        yaw: -28,
+        hotSpots: [{ pitch: -10, yaw: 79, type: "scene", sceneId: "almirante", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "almirante" } 
+        }]
+      },
+      almirante: {
+        type: "equirectangular", panorama: "images/patrimonio2.jpg", hfov: START_HFOV,
+        pitch: 0,
+        yaw: -2,
+        hotSpots: [{ pitch: -16, yaw: -2, type: "scene", sceneId: "almirante1", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "almirante1" } 
+        },
+          
+          { 
+            pitch: -16,   
+            yaw: 89, 
+            type: "scene", 
+            sceneId: "cemiterio", 
+            createTooltipFunc: createStreetViewHotspot, 
+            createTooltipArgs: { sceneId: "cemiterio" } 
           }
         ]
       },
-
-      salgado: {
-        type: "equirectangular",
-        panorama: "images/salgado2.jpg",
-        hfov: START_HFOV,
+      almirante1: {
+        type: "equirectangular", panorama: "images/patrimonio1.jpg", hfov: START_HFOV,
+        pitch: 20,
+        yaw: -2,
         hotSpots: [
-          {
-            pitch: -9,
-            yaw: 70,
-            type: "scene",
-            sceneId: "paroquia",
-            createTooltipFunc: createStreetViewHotspot,
-            createTooltipArgs: {
-              title: sceneTitles.paroquia,
-              thumb: sceneThumbs.paroquia,
-              sceneId: "paroquia",
-              viewer: null
-            }
+          // --- PRIMEIRO HOTSPOT ---
+          { 
+            pitch: -29, 
+            yaw: 176, 
+            type: "scene", 
+            sceneId: "almirante", 
+            createTooltipFunc: createStreetViewHotspot, 
+            createTooltipArgs: { sceneId: "almirante" } 
+          },
+          
+          { 
+            pitch: -11,   
+            yaw: 110, 
+            type: "scene", 
+            sceneId: "cemiterio", 
+            createTooltipFunc: createStreetViewHotspot, 
+            createTooltipArgs: { sceneId: "cemiterio" } 
           }
         ]
+      },
+      cemiterio: {
+        type: "equirectangular", panorama: "images/cemiterio.jpg", hfov: START_HFOV,
+        hotSpots: [{ pitch: -12, yaw: 178, type: "scene", sceneId: "estacao", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "estacao" } 
+        }]
+      },
+      estacao: {
+        type: "equirectangular", panorama: "images/estacao1.jpg", hfov: START_HFOV,
+        pitch: 24,
+        yaw: -4,
+        hotSpots: [{ pitch: -7, yaw: -85, type: "scene", sceneId: "igreja", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "igreja" } 
+        }]
+      },
+      igreja: {
+        type: "equirectangular", panorama: "images/igreja1.jpg", hfov: START_HFOV,
+        pitch: 11,
+        yaw: -169,
+        hotSpots: [{ pitch: -14, yaw: 4, type: "scene", sceneId: "salgado", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "salgado" } 
+        }]
+      },
+      salgado: {
+        type: "equirectangular", panorama: "images/salgado3.jpg", hfov: START_HFOV,
+        pitch: -1,
+        yaw: 178,
+        hotSpots: [{ pitch: -15, yaw: -178, type: "scene", sceneId: "salgado1", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "salgado1" } 
+        },
+          
+        { 
+          pitch: -5,   
+          yaw: -15, 
+          type: "scene", 
+          sceneId: "saogiao", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "saogiao" } 
+        }
+      ]
+      },
+      salgado1: {
+        type: "equirectangular", panorama: "images/salgado2.jpg", hfov: START_HFOV,
+        pitch: -4,
+        yaw: 6,
+        hotSpots: [{ pitch: -16, yaw: 86, type: "scene", sceneId: "saogiao", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "saogiao" } 
+        },
+          
+        { 
+          pitch: -30,   
+          yaw: -176, 
+          type: "scene", 
+          sceneId: "salgado", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "salgado" } 
+        }
+      ]
+      },
+      saogiao: {
+        type: "equirectangular", panorama: "images/sgiao1.jpg", hfov: MAX_HFOV,
+        pitch: 14,
+        yaw: -4,
+        hotSpots: [{ pitch: -4.35, yaw: 36.49, type: "scene", sceneId: "saogiao1", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "saogiao1" } 
+        },
+          
+        { 
+          pitch: -12,   
+          yaw: -95, 
+          type: "scene", 
+          sceneId: "salgado1", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "salgado1" } 
+        }
+      ]
+      },
+      saogiao1: {
+        type: "equirectangular", panorama: "images/sgiao2.jpg", hfov: START_HFOV,
+        pitch: 24,
+        yaw: -4,
+        hotSpots: [{ pitch: -19, yaw: -96, type: "scene", sceneId: "saogiao", 
+          createTooltipFunc: createStreetViewHotspot, 
+          createTooltipArgs: { sceneId: "saogiao" } 
+        }]
       }
     }
   });
 
   const viewer = window.viewer;
 
-  // Inject viewer nas createTooltipArgs (para funcionar dentro da função do hotspot)
-  // Pannellum chama createTooltipFunc com args fixos, por isso colocamos viewer ali.
-  Object.keys(viewer.getConfig().scenes).forEach((sid) => {
+  // Injetar viewer nos hotspots
+  Object.keys(viewer.getConfig().scenes).forEach(sid => {
     const sc = viewer.getConfig().scenes[sid];
-    if (!sc || !Array.isArray(sc.hotSpots)) return;
-    sc.hotSpots.forEach((hs) => {
-      if (hs && hs.createTooltipArgs && typeof hs.createTooltipArgs === "object") {
-        hs.createTooltipArgs.viewer = viewer;
-      }
+    if(sc && sc.hotSpots) sc.hotSpots.forEach(hs => {
+      if(hs.createTooltipArgs) hs.createTooltipArgs.viewer = viewer;
     });
   });
 
-  // Título inicial
-  setSceneTitle("paroquia");
-
-  // Timeline dots
+  setSceneTitle("junta");
   buildTimeline(viewer);
   setTimelineActive(viewer.getScene());
 
-  viewer.on("scenechange", (sceneId) => {
-    setSceneTitle(sceneId);
-    setTimelineActive(sceneId);
+  // --- Lógica Intro Variables ---
+  let introDone = false;
+
+  // EVENTO DE MUDANÇA DE CENA (Navegação normal entre hotspots)
+  viewer.on("scenechange", (sid) => {
+    setSceneTitle(sid); 
+    setTimelineActive(sid); 
     closeDropdown();
     if (isMobileWidth) setMobileMenuOpen(false);
+
+    // Se a navegação for para a junta E a intro já tiver acabado
+    if (sid === 'junta' && introDone) {
+      // Delay pequeno para garantir carregamento e depois anima
+      setTimeout(runDropAnimation, 100); 
+    }
   });
 
-  /* ===============================
-     HOTSPOT PICKER (ALT+CLICK)
-  ================================ */
+  // Hotspot Picker (ALT+CLICK)
   panoEl.addEventListener("pointerdown", (e) => {
-    if (!e.altKey) return;
+    if(!e.altKey || !viewer.mouseEventToCoords) return;
     e.preventDefault();
-
-    if (typeof viewer.mouseEventToCoords !== "function") {
-      console.warn("viewer.mouseEventToCoords não existe nesta versão do Pannellum.");
-      return;
-    }
-
-    const [pitch, yaw] = viewer.mouseEventToCoords(e);
-    const sceneId = viewer.getScene();
-
-    console.log("=== HOTSPOT PICKER ===");
-    console.log("scene:", sceneId);
-    console.log("pitch:", Number(pitch.toFixed(2)));
-    console.log("yaw:", Number(yaw.toFixed(2)));
+    const [p, y] = viewer.mouseEventToCoords(e);
+    console.log(`Scene: ${viewer.getScene()} | Pitch: ${p.toFixed(2)}, Yaw: ${y.toFixed(2)}`);
   }, true);
 
-  /* ===============================
-     MENU: desktop hover / mobile click + hamburger
-  ================================ */
+  // Menus
   const iconbar = document.getElementById("iconbar");
   const dropdown = document.getElementById("dropdown");
   const closeBtn = document.getElementById("dropdownClose");
   const mobileMenuBtn = document.getElementById("mobileMenuBtn");
 
-  if (closeBtn) {
-    closeBtn.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      closeDropdown();
-    });
-  }
+  if (closeBtn) closeBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); closeDropdown(); });
 
   if (isMobileWidth) {
-    if (mobileMenuBtn) {
-      mobileMenuBtn.addEventListener("pointerdown", (e) => {
-        e.preventDefault();
-        const openNow = iconbar?.classList.contains("is-open");
-        closeDropdown();
-        setMobileMenuOpen(!openNow);
-      });
-    }
-
-    if (iconbar) {
-      iconbar.addEventListener("pointerdown", (e) => {
-        const btn = e.target.closest(".iconbtn");
-        if (!btn) return;
-
-        e.preventDefault();
-
-        const ddOpen = dropdown?.classList.contains("is-open");
-        const sameActive = btn.classList.contains("is-active");
-
-        if (ddOpen && sameActive) closeDropdown();
-        else openDropdown(btn.dataset.cat, btn, viewer);
-      });
-    }
+    if (mobileMenuBtn) mobileMenuBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault(); const open = iconbar?.classList.contains("is-open");
+      closeDropdown(); setMobileMenuOpen(!open);
+    });
+    if (iconbar) iconbar.addEventListener("pointerdown", (e) => {
+      const btn = e.target.closest(".iconbtn");
+      if(!btn) return; e.preventDefault();
+      const ddOpen = dropdown?.classList.contains("is-open");
+      if(ddOpen && btn.classList.contains("is-active")) closeDropdown();
+      else openDropdown(btn.dataset.cat, btn, viewer);
+    });
   } else {
-    let closeTimer = null;
-
-    const scheduleClose = () => {
-      if (closeTimer) clearTimeout(closeTimer);
-      closeTimer = setTimeout(() => closeDropdown(), 180);
-    };
-    const cancelClose = () => {
-      if (closeTimer) clearTimeout(closeTimer);
-      closeTimer = null;
-    };
-
+    let timer = null;
+    const schedule = () => { if(timer) clearTimeout(timer); timer = setTimeout(closeDropdown, 180); };
+    const cancel = () => { if(timer) clearTimeout(timer); timer = null; };
     if (iconbar) {
       iconbar.querySelectorAll(".iconbtn").forEach(btn => {
-        btn.addEventListener("mouseenter", () => {
-          cancelClose();
-          openDropdown(btn.dataset.cat, btn, viewer);
-        });
+        btn.addEventListener("mouseenter", () => { cancel(); openDropdown(btn.dataset.cat, btn, viewer); });
       });
-
-      iconbar.addEventListener("mouseleave", scheduleClose);
-
-      if (dropdown) {
-        dropdown.addEventListener("mouseenter", cancelClose);
-        dropdown.addEventListener("mouseleave", scheduleClose);
-      }
+      iconbar.addEventListener("mouseleave", schedule);
+      if(dropdown) { dropdown.addEventListener("mouseenter", cancel); dropdown.addEventListener("mouseleave", schedule); }
     }
   }
 
-  // click fora fecha dropdown e iconbar (mobile)
   document.addEventListener("pointerdown", (e) => {
-    const inside =
-      e.target.closest(".iconbar") ||
-      e.target.closest("#dropdown") ||
-      e.target.closest("#mobileMenuBtn");
-
-    if (!inside) {
-      if (dropdown?.classList.contains("is-open")) closeDropdown();
-      if (isMobileWidth) setMobileMenuOpen(false);
+    if(!e.target.closest(".iconbar") && !e.target.closest("#dropdown") && !e.target.closest("#mobileMenuBtn")){
+      if(dropdown?.classList.contains("is-open")) closeDropdown();
+      if(isMobileWidth) setMobileMenuOpen(false);
     }
   });
 
-  /* ===============================
-     MAP
-  ================================ */
   initMapModal(viewer);
+  initMobileGyroToggle(viewer);
+  initHoverLook(viewer, panoEl);
 
-  /* ===============================
-     INTRO
-  ================================ */
+  // --- START TOUR LOGIC ---
   const overlay = document.getElementById("introOverlay");
   const skipBtn = document.getElementById("skipIntro");
-  let done = false;
-
+  
   function startTour() {
-    if (done) return;
-    done = true;
+    if(introDone) return; 
+    introDone = true;
 
-    if (overlay) {
-      overlay.classList.add("is-hiding");
-      setTimeout(() => overlay.remove(), 380);
+    // 1. Remove overlay
+    if(overlay) { 
+      overlay.classList.add("is-hiding"); 
+      setTimeout(() => overlay.remove(), 380); 
     }
+    
+    // 2. Mostra UI
+    showMapButton(); 
+    if(isMobileWidth) showGyroButton();
+    const timeline = document.getElementById("timeline");
+    if(timeline) timeline.classList.add("is-visible");
 
-    showMapButton();
-    if (isMobileWidth) showGyroButton();
-    else hideGyroButton();
+    // 3. ANIMAÇÃO INICIAL
+    if (window.viewer.getScene() === 'junta') {
+      // Espera 450ms (tempo para o overlay desaparecer) antes de começar
+      setTimeout(() => {
+        runDropAnimation();
+      }, 450);
+    }
   }
-
-  if (skipBtn) {
-    skipBtn.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      startTour();
-    });
-  }
+  
+  if(skipBtn) skipBtn.addEventListener("pointerdown", (e)=>{ 
+    e.preventDefault(); 
+    startTour(); 
+  });
+  
+  // Timeout automático se ninguém clicar
   setTimeout(startTour, INTRO_DURATION_MS);
-
-  /* ===============================
-     MOBILE GYRO
-  ================================ */
-  initMobileGyroToggle(viewer);
-
-  /* ===============================
-     HOVER LOOK (desktop only)
-  ================================ */
-  initHoverLook(viewer, panoEl);
 });

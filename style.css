@@ -12,14 +12,26 @@ html, body{
   width: 100%;
   height: 100vh;
   background: #000;
+  /* Transição suave se precisarmos de mudar opacidade */
+  transition: opacity 0.5s ease;
 }
 
-/* Remove UI Pannellum */
-.pnlm-about-msg{ display:none !important; }
-.pnlm-load-box, .pnlm-lbar, .pnlm-lbar-fill, .pnlm-lmsg{ display:none !important; }
+/* --- BLOQUEIO DE INTERAÇÃO (NOVO) --- */
+/* Quando o panorama tem esta classe, o rato não funciona nele */
+#panorama.is-locked {
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+/* Remove UI Padrão do Pannellum */
+.pnlm-about-msg, 
+.pnlm-load-box, 
+.pnlm-lbar, 
+.pnlm-lbar-fill, 
+.pnlm-lmsg{ display:none !important; }
 
 /* ==========================
-   INTRO IMAGE
+   INTRO IMAGE OVERLAY
 ========================== */
 .intro-overlay{
   position: fixed;
@@ -50,7 +62,7 @@ html, body{
 }
 
 /* ==========================
-   SKIP (underline)
+   SKIP BUTTON
 ========================== */
 .skip-btn{
   position: absolute;
@@ -115,7 +127,7 @@ html, body{
 }
 
 /* ==========================
-   ICON BAR (desktop centrado)
+   ICON BAR
 ========================== */
 .iconbar{
   position: absolute;
@@ -168,7 +180,6 @@ html, body{
   left: 50%;
   top: calc(100% + 10px);
   transform: translateX(-50%) translateY(-8px);
-
   width: min(640px, calc(100vw - 40px));
   border-radius: 18px;
   background: rgba(16,16,18,0.72);
@@ -176,7 +187,6 @@ html, body{
   backdrop-filter: blur(16px);
   box-shadow: 0 30px 90px rgba(0,0,0,0.55);
   overflow: hidden;
-
   opacity: 0;
   pointer-events: none;
   transition: opacity 180ms ease, transform 180ms ease;
@@ -531,13 +541,13 @@ html, body{
 }
 
 /* ==========================
-   HOTSPOTS - STREET VIEW STYLE
+   HOTSPOTS - CIRCULO LIMPO
 ========================== */
 
 /* remove bolinha default do Pannellum */
 .pnlm-hotspot-base{ background: transparent !important; }
 
-/* wrapper do hotspot (não mexer no transform do Pannellum!) */
+/* Wrapper do hotspot */
 .hs-sv{
   width: 46px;
   height: 46px;
@@ -546,94 +556,37 @@ html, body{
   pointer-events: auto !important;
 }
 
-/* o "anel" */
+/* O anel branco principal */
 .hs-sv .hs-sv-dot{
   position: absolute;
   inset: 0;
-  border-radius: 999px;
-  border: 2px solid rgba(255,255,255,0.95);
-  box-shadow: 0 0 0 7px rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.10);
-  backdrop-filter: blur(2px);
+  border-radius: 50%;
+  
+  /* Borda branca sólida */
+  border: 3px solid #ffffff;
+  
+  /* Fundo ligeiramente escuro para o clique ser percetível, mas transparente */
+  background: rgba(0,0,0,0.1); 
+  
+  transition: transform 0.2s ease;
 }
 
-/* brilho suave */
+/* Efeito ao passar o rato (apenas cresce) */
+.hs-sv:hover .hs-sv-dot {
+    transform: scale(1.15);
+    background: rgba(0,0,0,0.2);
+    border-color: #fff;
+}
+
+/* Garante que o brilho externo (nevoeiro) NÃO APARECE */
 .hs-sv::after{
-  content:"";
-  position:absolute;
-  inset:-16px;
-  border-radius:999px;
-  background: radial-gradient(circle, rgba(255,255,255,0.16), rgba(255,255,255,0) 62%);
-  opacity: 0.28;
-  pointer-events:none;
+  display: none !important;
 }
 
-/* bolha preview */
-.hs-sv .hs-sv-bubble{
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 92px;
-  height: 92px;
-  transform: translate(-50%, -155%);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 160ms ease, transform 160ms ease;
-}
-
-.hs-sv.is-open .hs-sv-bubble{
-  opacity: 1;
-  transform: translate(-50%, -168%);
-}
-
-.hs-sv .hs-sv-thumb{
-  width: 100%;
-  height: 100%;
-  border-radius: 999px;
-  background-size: cover;
-  background-position: center;
-  border: 2px solid rgba(255,255,255,0.92);
-  box-shadow: 0 18px 50px rgba(0,0,0,0.55);
-}
-
-/* label opcional (aparece abaixo da bolha) */
+/* Garante que bolhas/texto NÃO APARECEM */
+.hs-sv .hs-sv-bubble,
 .hs-sv .hs-sv-label{
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translate(-50%, -205%);
-  white-space: nowrap;
-  padding: 9px 11px;
-  border-radius: 999px;
-  background: rgba(14,14,16,0.78);
-  border: 1px solid rgba(255,255,255,0.14);
-  backdrop-filter: blur(14px);
-  color: rgba(255,255,255,0.95);
-  font-weight: 900;
-  font-size: 12px;
-  letter-spacing: 0.2px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 160ms ease, transform 160ms ease;
-  box-shadow: 0 22px 60px rgba(0,0,0,0.55);
-}
-
-.hs-sv.is-open .hs-sv-label{
-  opacity: 1;
-  transform: translate(-50%, -220%);
-}
-
-/* desktop: hover abre */
-@media (hover:hover){
-  .hs-sv:hover{ }
-  .hs-sv:hover .hs-sv-bubble{ opacity: 1; transform: translate(-50%, -168%); }
-  .hs-sv:hover .hs-sv-label{ opacity: 1; transform: translate(-50%, -220%); }
-}
-
-/* tamanhos mobile */
-@media (max-width: 900px){
-  .hs-sv{ width: 42px; height: 42px; }
-  .hs-sv .hs-sv-bubble{ width: 84px; height: 84px; }
+  display: none !important;
 }
 
 /* ==========================
@@ -652,7 +605,16 @@ html, body{
   display: grid;
   place-items: center;
   width: 100%;
+  
+  /* ESTADO INICIAL: Oculto */
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+
+.timeline.is-visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .timeline-track{
