@@ -5,215 +5,104 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Famalicão 360 Tour</title>
 
-  <!-- Pannellum -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
-  />
-
-  <!-- App CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-  <!-- =========================
-       INTRO IMAGE OVERLAY
-  ========================== -->
   <div id="introOverlay" class="intro-overlay" aria-hidden="false">
     <div class="intro-image"></div>
-    <button id="skipIntro" class="skip-btn" type="button">
-      Skip
-    </button>
+    <button id="skipIntro" class="skip-btn" type="button">Entrar</button>
   </div>
 
-  <!-- =========================
-       TOP UI
-  ========================== -->
-  <header class="top-ui" aria-label="Navegação">
+  <header class="top-ui">
+    <div class="site-title" id="sceneTitle">Famalicão 360</div>
 
-    <!-- TÍTULO DO LOCAL -->
-    <div class="site-title" id="sceneTitle">
-      Praça Central
-    </div>
+    <nav class="iconbar" id="iconbar">
+      <button class="iconbtn" data-cat="igreja"><img src="images/icons/igreja.png" alt="Igrejas"></button>
+      <button class="iconbtn" data-cat="monumento"><img src="images/icons/monumento.png" alt="Monumentos"></button>
+      <button class="iconbtn" data-cat="comboio"><img src="images/icons/comboio.png" alt="Estação"></button>
+      <button class="iconbtn" data-cat="junta"><img src="images/icons/camaramunicipal.png" alt="Junta"></button>
+      <button class="iconbtn" data-cat="praia"><img src="images/icons/praia.png" alt="Praias"></button>
 
-    <!-- MOBILE MENU BUTTON -->
-    <button
-      id="mobileMenuBtn"
-      class="mobile-menu-btn"
-      type="button"
-      aria-label="Abrir menu de locais"
-    >
-      <span class="burger" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
-      </span>
-    </button>
-
-    <!-- ICON BAR -->
-    <nav class="iconbar" id="iconbar" aria-label="Categorias">
-
-      <button class="iconbtn" data-cat="igreja" aria-label="Igrejas" type="button">
-        <img src="images/icons/igreja.png" alt="">
-      </button>
-
-      <button class="iconbtn" data-cat="monumento" aria-label="Monumentos" type="button">
-        <img src="images/icons/monumento.png" alt="">
-      </button>
-
-      <button class="iconbtn" data-cat="comboio" aria-label="Comboio" type="button">
-        <img src="images/icons/comboio.png" alt="">
-      </button>
-
-      <button class="iconbtn" data-cat="junta" aria-label="Câmara Municipal" type="button">
-        <img src="images/icons/camaramunicipal.png" alt="">
-      </button>
-
-      <button class="iconbtn" data-cat="praia" aria-label="Praias" type="button">
-        <img src="images/icons/praia.png" alt="">
-      </button>
-
-      <!-- DROPDOWN -->
       <div class="dropdown" id="dropdown" aria-hidden="true">
         <div class="dropdown-head">
           <div class="dropdown-title" id="dropdownTitle">Locais</div>
-          <button
-            class="dropdown-close"
-            id="dropdownClose"
-            type="button"
-            aria-label="Fechar"
-          >
-            ✕
-          </button>
+          <button class="dropdown-close" id="dropdownClose">✕</button>
         </div>
-
         <div class="dropdown-list" id="dropdownList"></div>
       </div>
     </nav>
 
-    <!-- REDES SOCIAIS -->
-    <nav class="socialbar" aria-label="Redes sociais">
-      <a
-        class="socialbtn"
-        href="https://www.freguesia-famalicao.pt/"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Website"
-      >
-        <img src="images/icons/website.png" alt="">
-      </a>
-
-      <a
-        class="socialbtn"
-        href="https://www.facebook.com/freguesia.famalicao/mentions/"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Facebook"
-      >
-        <img src="images/icons/facebook.png" alt="">
-      </a>
-
-      <a
-        class="socialbtn"
-        href="https://www.instagram.com/freguesia.famalicao/"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Instagram"
-      >
-        <img src="images/icons/instagram.png" alt="">
-      </a>
+    <nav class="socialbar">
+      <a class="socialbtn" href="#" target="_blank"><img src="images/icons/website.png" alt="Site"></a>
+      <a class="socialbtn" href="#" target="_blank"><img src="images/icons/facebook.png" alt="FB"></a>
+      <a class="socialbtn" href="#" target="_blank"><img src="images/icons/instagram.png" alt="IG"></a>
     </nav>
-
   </header>
 
-  <!-- =========================
-       PANORAMA VIEWER
-  ========================== -->
   <div id="panorama"></div>
+  <div class="top-fade"></div>
+  <div class="bottom-fade"></div>
 
-  <!-- fades topo e fundo -->
-  <div class="top-fade" aria-hidden="true"></div>
-  <div class="bottom-fade" aria-hidden="true"></div>
+  <nav id="timeline" class="timeline"></nav>
 
-  <!-- =========================
-       TIMELINE (desktop only) - só dots, centrada
-  ========================== -->
-  <nav id="timeline" class="timeline" aria-label="Timeline da tour"></nav>
-
-  <!-- =========================
-       MAP BUTTON (aparece após intro)
-  ========================== -->
-  <button
-    id="mapBtn"
-    class="map-btn is-hidden"
-    type="button"
-    aria-label="Abrir mapa"
-  >
-    <img class="map-icon" src="images/icons/mapa.png" alt="">
+  <button id="mapBtn" class="map-btn is-hidden">
+    <img class="map-icon" src="images/icons/mapa.png" alt="Mapa">
   </button>
 
-  <!-- =========================
-       MAP MODAL
-  ========================== -->
-  <div id="mapModal" class="map-modal" aria-hidden="true">
-    <div class="map-panel" role="dialog" aria-modal="true" aria-label="Mapa">
+  <button id="gyroBtn" class="gyro-btn is-hidden">
+    <img class="gyro-icon" src="images/icons/telemovel.png" alt="Gyro">
+  </button>
 
-      <div class="map-head">
-        <div class="map-title">Mapa</div>
-        <button
-          id="mapClose"
-          class="map-close"
-          type="button"
-          aria-label="Fechar"
-        >
-          ✕
-        </button>
+  <button id="centralBtn" class="central-btn is-hidden">
+    <span class="central-text">Explorar</span>
+  </button>
+
+  <div id="mobileExplorerModal" class="mobile-explorer-modal" aria-hidden="true">
+    <div class="explorer-panel">
+      
+      <div class="explorer-head">
+        <div class="explorer-drag-indicator"></div>
+        <button id="explorerClose" class="explorer-close">✕</button>
       </div>
 
-      <div class="map-wrap">
-        <img
-          id="mapImage"
-          class="map-image"
-          src="images/famalicaodrone.jpg"
-          alt="Mapa drone"
-          draggable="false"
-        />
-
-        <!-- PINS (ajusta posições como quiseres) -->
-        <button class="pin" data-scene="junta" style="left:47%; top:75%;" aria-label="Junta de Freguesia"></button>
-        <button class="pin" data-scene="centro" style="left:60%; top:84%;" aria-label="Centro Social da Freguesia de Famalicão"></button>
-        <button class="pin" data-scene="almirante" style="left:51%; top:86%;" aria-label="Monumento"></button>
-        <button class="pin" data-scene="cemiterio" style="left:39%; top:94%;" aria-label="Cemitério de Famalicão"></button>
-        <button class="pin" data-scene="igreja" style="left:45%; top:62%;" aria-label="Paróquia de Nossa Senhora da Vitória"></button>
-        <button class="pin" data-scene="salgado" style="left:35%; top:16%;" aria-label="Praia do Salgado"></button>
-        <button class="pin" data-scene="saogiao" style="left:55%; top:16%;" aria-label="Igreja de S. Gião"></button>
+      <div class="category-nav">
+        <button id="catPrev" class="cat-arrow">❮</button>
+        <div class="cat-label-box">
+          <span id="catCurrentLabel">IGREJAS</span>
+        </div>
+        <button id="catNext" class="cat-arrow">❯</button>
       </div>
+
+      <div id="mobileLocList" class="mobile-loc-list">
+        </div>
 
     </div>
   </div>
 
-  <!-- =========================
-       GYRO BUTTON (mobile only)
-  ========================== -->
-  <button
-    id="gyroBtn"
-    class="gyro-btn is-hidden"
-    type="button"
-    aria-label="Ativar movimento"
-  >
-    <img
-      class="gyro-icon"
-      src="images/icons/telemovel.png"
-      alt=""
-    >
-  </button>
+  <div id="mapModal" class="map-modal" aria-hidden="true">
+    <div class="map-panel">
+      <div class="map-head">
+        <div class="map-title">Mapa</div>
+        <button id="mapClose" class="map-close">✕</button>
+      </div>
+      <div class="map-wrap">
+        <img id="mapImage" class="map-image" src="images/famalicaodrone.jpg" draggable="false" alt="Mapa Drone" />
+        
+        <button class="pin" data-scene="junta" style="left:47%; top:75%;"></button>
+        <button class="pin" data-scene="centro" style="left:60%; top:84%;"></button>
+        <button class="pin" data-scene="almirante" style="left:51%; top:86%;"></button>
+        <button class="pin" data-scene="cemiterio" style="left:39%; top:94%;"></button>
+        <button class="pin" data-scene="igreja" style="left:45%; top:62%;"></button>
+        <button class="pin" data-scene="salgado" style="left:35%; top:16%;"></button>
+        <button class="pin" data-scene="saogiao" style="left:55%; top:16%;"></button>
+      </div>
+    </div>
+  </div>
 
-  <!-- =========================
-       SCRIPTS
-  ========================== -->
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
   <script src="app.js"></script>
-
 </body>
 </html>
