@@ -10,6 +10,8 @@
 </head>
 
 <body>
+  
+  <img src="images/junta.jpg" style="display:none;" aria-hidden="true" alt="preload">
 
   <div id="introOverlay" class="intro-overlay" aria-hidden="false">
     <div class="intro-image"></div>
@@ -62,14 +64,11 @@
 
   <div id="mobileExplorerModal" class="mobile-explorer-modal" aria-hidden="true">
     <div class="explorer-panel">
-      
       <div class="explorer-head">
         <div class="explorer-drag-indicator"></div>
         <button id="explorerClose" class="explorer-close">✕</button>
       </div>
-
       <div id="mobileLocList" class="mobile-loc-list"></div>
-
       <div class="category-nav">
         <button id="catPrev" class="cat-arrow">❮</button>
         <div class="cat-label-box">
@@ -77,7 +76,6 @@
         </div>
         <button id="catNext" class="cat-arrow">❯</button>
       </div>
-
     </div>
   </div>
 
@@ -89,7 +87,6 @@
       </div>
       <div class="map-wrap">
         <img id="mapImage" class="map-image" src="images/famalicaodrone.jpg" draggable="false" alt="Mapa" />
-        
         <button class="pin" data-scene="junta" style="left:47%; top:75%;"></button>
         <button class="pin" data-scene="centro" style="left:60%; top:84%;"></button>
         <button class="pin" data-scene="almirante" style="left:51%; top:86%;"></button>

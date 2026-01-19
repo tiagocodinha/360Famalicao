@@ -1,5 +1,7 @@
 /* ===============================
    Modern 360 Tour (Pannellum)
+   - Otimizado: Previews (blur instantâneo) + Preload
+   - Mobile: Explorar em baixo, Gyro inteligente
 ================================ */
 
 const INTRO_DURATION_MS = 5000;
@@ -419,68 +421,101 @@ window.addEventListener("load", () => {
       autoLoad: true,
       hfov: START_HFOV,
       minHfov: MIN_HFOV, maxHfov: MAX_HFOV,
-      sceneFadeDuration: 300, // Faster Fade
+      sceneFadeDuration: 300, // Transição Rápida
       showControls: false, orientationOnByDefault: false, autoRotate: false
     },
     scenes: {
       junta: {
-        type: "equirectangular", panorama: "images/junta.jpg", hfov: START_HFOV,
+        type: "equirectangular", 
+        panorama: "images/junta.jpg", 
+        preview: "images/preview/junta_preview.jpg", // PREVIEW
+        hfov: START_HFOV,
         pitch: JUNTA_INITIAL_PITCH, yaw: -1,
         hotSpots: [{ pitch: -9, yaw: -171, type: "scene", sceneId: "centro", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "centro" } }]
       },
       centro: {
-        type: "equirectangular", panorama: "images/centro.jpg", hfov: START_HFOV, pitch: 0, yaw: -28,
+        type: "equirectangular", 
+        panorama: "images/centro.jpg", 
+        preview: "images/preview/centro_preview.jpg", // PREVIEW
+        hfov: START_HFOV, pitch: 0, yaw: -28,
         hotSpots: [{ pitch: -10, yaw: 79, type: "scene", sceneId: "almirante", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "almirante" } }]
       },
       almirante: {
-        type: "equirectangular", panorama: "images/patrimonio2.jpg", hfov: START_HFOV, pitch: 0, yaw: -2,
+        type: "equirectangular", 
+        panorama: "images/patrimonio2.jpg", 
+        preview: "images/preview/patrimonio2_preview.jpg", // PREVIEW
+        hfov: START_HFOV, pitch: 0, yaw: -2,
         hotSpots: [
           { pitch: -16, yaw: -2, type: "scene", sceneId: "almirante1", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "almirante1" } },
           { pitch: -16, yaw: 89, type: "scene", sceneId: "cemiterio", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "cemiterio" } }
         ]
       },
       almirante1: {
-        type: "equirectangular", panorama: "images/patrimonio1.jpg", hfov: START_HFOV, pitch: 20, yaw: -2,
+        type: "equirectangular", 
+        panorama: "images/patrimonio1.jpg", 
+        preview: "images/preview/patrimonio1_preview.jpg", // PREVIEW
+        hfov: START_HFOV, pitch: 20, yaw: -2,
         hotSpots: [
           { pitch: -29, yaw: 176, type: "scene", sceneId: "almirante", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "almirante" } },
           { pitch: -11, yaw: 110, type: "scene", sceneId: "estacao", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "estacao" } }
         ]
       },
       cemiterio: {
-        type: "equirectangular", panorama: "images/cemiterio.jpg", hfov: START_HFOV,
+        type: "equirectangular", 
+        panorama: "images/cemiterio.jpg", 
+        preview: "images/preview/cemiterio_preview.jpg", // PREVIEW
+        hfov: START_HFOV,
         hotSpots: [{ pitch: -12, yaw: 178, type: "scene", sceneId: "estacao", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "estacao" } }]
       },
       estacao: {
-        type: "equirectangular", panorama: "images/estacao1.jpg", hfov: START_HFOV, pitch: 24, yaw: -4,
+        type: "equirectangular", 
+        panorama: "images/estacao1.jpg", 
+        preview: "images/preview/estacao1_preview.jpg", // PREVIEW
+        hfov: START_HFOV, pitch: 24, yaw: -4,
         hotSpots: [{ pitch: -7, yaw: -85, type: "scene", sceneId: "igreja", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "igreja" } }]
       },
       igreja: {
-        type: "equirectangular", panorama: "images/igreja1.jpg", hfov: START_HFOV, pitch: 11, yaw: -169,
+        type: "equirectangular", 
+        panorama: "images/igreja1.jpg", 
+        preview: "images/preview/igreja1_preview.jpg", // PREVIEW
+        hfov: START_HFOV, pitch: 11, yaw: -169,
         hotSpots: [{ pitch: -14, yaw: 4, type: "scene", sceneId: "salgado", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "salgado" } }]
       },
       salgado: {
-        type: "equirectangular", panorama: "images/salgado3.jpg", hfov: START_HFOV, pitch: -1, yaw: 178,
+        type: "equirectangular", 
+        panorama: "images/salgado3.jpg", 
+        preview: "images/preview/salgado3_preview.jpg", // PREVIEW
+        hfov: START_HFOV, pitch: -1, yaw: 178,
         hotSpots: [
           { pitch: -15, yaw: -178, type: "scene", sceneId: "salgado1", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "salgado1" } },
           { pitch: -5, yaw: -15, type: "scene", sceneId: "saogiao", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "saogiao" } }
         ]
       },
       salgado1: {
-        type: "equirectangular", panorama: "images/salgado2.jpg", hfov: START_HFOV, pitch: -4, yaw: 6,
+        type: "equirectangular", 
+        panorama: "images/salgado2.jpg", 
+        preview: "images/preview/salgado2_preview.jpg", // PREVIEW
+        hfov: START_HFOV, pitch: -4, yaw: 6,
         hotSpots: [
           { pitch: -16, yaw: 86, type: "scene", sceneId: "saogiao", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "saogiao" } },
           { pitch: -30, yaw: -176, type: "scene", sceneId: "salgado", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "salgado" } }
         ]
       },
       saogiao: {
-        type: "equirectangular", panorama: "images/sgiao1.jpg", hfov: MAX_HFOV, pitch: 14, yaw: -4,
+        type: "equirectangular", 
+        panorama: "images/sgiao1.jpg", 
+        preview: "images/preview/sgiao1_preview.jpg", // PREVIEW
+        hfov: MAX_HFOV, pitch: 14, yaw: -4,
         hotSpots: [
           { pitch: -4.35, yaw: 36.49, type: "scene", sceneId: "saogiao1", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "saogiao1" } },
           { pitch: -12, yaw: -95, type: "scene", sceneId: "salgado1", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "salgado1" } }
         ]
       },
       saogiao1: {
-        type: "equirectangular", panorama: "images/sgiao2.jpg", hfov: START_HFOV, pitch: 24, yaw: -4,
+        type: "equirectangular", 
+        panorama: "images/sgiao2.jpg", 
+        preview: "images/preview/sgiao2_preview.jpg", // PREVIEW
+        hfov: START_HFOV, pitch: 24, yaw: -4,
         hotSpots: [{ pitch: -19, yaw: -96, type: "scene", sceneId: "saogiao", createTooltipFunc: createStreetViewHotspot, createTooltipArgs: { sceneId: "saogiao" } }]
       }
     }
@@ -530,7 +565,6 @@ window.addEventListener("load", () => {
 
   if (iconbar) {
     iconbar.querySelectorAll(".iconbtn").forEach(btn => {
-      // CLICK
       btn.addEventListener("pointerdown", (e) => {
         if (window.matchMedia("(max-width: 900px)").matches) return;
         e.preventDefault();
@@ -541,7 +575,7 @@ window.addEventListener("load", () => {
           openDropdown(btn.dataset.cat, btn, viewer);
         }
       });
-      // HOVER
+      
       btn.addEventListener("mouseenter", () => {
         if (!window.matchMedia("(max-width: 900px)").matches) {
           cancelCloseDropdown();
@@ -604,11 +638,12 @@ window.addEventListener("load", () => {
     startTour(); 
   });
   
-  // --- PRELOADER ---
+  // --- PRELOADER INTELIGENTE ---
   function preloadImages() {
     const config = viewer.getConfig();
     if (config && config.scenes) {
       Object.keys(config.scenes).forEach(key => {
+        // Carrega imagem grande em background
         const img = new Image();
         img.src = config.scenes[key].panorama;
       });
@@ -617,6 +652,6 @@ window.addEventListener("load", () => {
   
   setTimeout(() => {
     startTour();
-    setTimeout(preloadImages, 2000);
+    setTimeout(preloadImages, 2000); // Começa a carregar tudo 2s depois
   }, INTRO_DURATION_MS);
 });
