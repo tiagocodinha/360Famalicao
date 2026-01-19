@@ -726,29 +726,58 @@ html, body{
 
 .tdot.is-active::after{ opacity: 0.95; }
 
-.ttip{
+/* ==========================
+   TOOLTIP (Nomes na Timeline)
+   - Estilo Minimalista / Leve
+========================== */
+.ttip {
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 10px);
-  transform: translateX(-50%) translateY(6px);
+  bottom: calc(100% + 12px); /* Distância do ponto */
+  transform: translateX(-50%) translateY(5px); /* Começa um pouco descido */
+  
+  /* Estilo da Caixa */
+  background: rgba(0, 0, 0, 0.5); /* Fundo escuro mas transparente */
+  backdrop-filter: blur(4px); /* Ligeiro desfoque atrás */
+  padding: 5px 10px;
+  border-radius: 6px; /* Cantos suaves, mas não redondos demais */
+  
+  /* Tipografia Limpa */
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  font-size: 11px; /* Texto pequeno e discreto */
+  font-weight: 600;
+  text-transform: uppercase; /* Maiúsculas para elegância */
+  letter-spacing: 1px; /* Espaçamento entre letras */
   white-space: nowrap;
-  padding: 9px 11px;
-  border-radius: 999px;
-  background: rgba(14,14,16,0.78);
-  border: 1px solid rgba(255,255,255,0.14);
-  backdrop-filter: blur(14px);
-  color: rgba(255,255,255,0.95);
-  font-weight: 900;
-  font-size: 12px;
-  letter-spacing: 0.2px;
+  
+  /* Animação */
   opacity: 0;
-  transition: opacity 160ms ease, transform 160ms ease;
   pointer-events: none;
-  box-shadow: 0 22px 60px rgba(0,0,0,0.55);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  
+  /* Sombra apenas no texto para leitura, sem sombra na caixa */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
+/* Pequeno triângulo (seta) em baixo (Opcional - dá um toque de acabamento) */
+.ttip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.5) transparent transparent transparent;
+}
+
+/* Quando passa o rato no ponto */
 @media (hover:hover){
-  .tdot:hover .ttip{ opacity: 1; transform: translateX(-50%) translateY(0); }
+  .tdot:hover .ttip { 
+    opacity: 1; 
+    transform: translateX(-50%) translateY(0); /* Sobe para o sítio */
+  }
 }
 
 @media (max-width: 900px){
