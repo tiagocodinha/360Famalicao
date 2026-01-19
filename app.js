@@ -1,5 +1,7 @@
 /* ===============================
    Modern 360 Tour (Pannellum)
+   - Otimizado para Mobile (300ms fade, Preloader)
+   - Gyro inteligente (Touch desativa)
 ================================ */
 
 const INTRO_DURATION_MS = 5000;
@@ -95,13 +97,7 @@ function buildTimeline(viewer){
   const root = document.getElementById("timeline");
   if (!root) return;
   root.innerHTML = "";
-  const track = document.createElement("div");
-  track.className = "timeline-track"; // Mantido por compatibilidade, mas o CSS trata direto
-  root.appendChild(track); // No CSS actual usamos o container direto, mas isto nao estraga.
-
-  // Limpa e usa o container direto para melhor controlo do gap
-  root.innerHTML = "";
-
+  
   tourOrder.forEach((sceneId) => {
     const dot = document.createElement("button");
     dot.type = "button";
@@ -279,7 +275,7 @@ function initMapModal(viewer) {
   });
 }
 
-// LÓGICA DO GYRO (Corrigida: desliga ao tocar na imagem)
+// LÓGICA DO GYRO (Corrigida: desliga ao tocar)
 function initMobileGyroToggle(viewer){
   const gyroBtn = document.getElementById("gyroBtn");
   const panoEl = document.getElementById("panorama");
@@ -294,7 +290,6 @@ function initMobileGyroToggle(viewer){
     return true;
   }
 
-  // Função para desligar o Gyro
   function turnOffGyro() {
     if (enabled && viewer.stopOrientation) {
       enabled = false;
@@ -304,11 +299,9 @@ function initMobileGyroToggle(viewer){
     }
   }
 
-  // Click no botão
   gyroBtn.addEventListener("pointerdown", async (e) => {
     e.preventDefault();
     if (!enabled) {
-      // Tentar ligar
       if (await requestIOSPermissionIfNeeded()) {
         enabled = true;
         if (viewer.startOrientation) viewer.startOrientation();
@@ -316,16 +309,12 @@ function initMobileGyroToggle(viewer){
         gyroBtn.style.transform = "scale(1.1)";
       }
     } else {
-      // Desligar
       turnOffGyro();
     }
   });
 
-  // Interromper Gyro se utilizador tocar na imagem
   panoEl.addEventListener("pointerdown", () => {
-    if (enabled) {
-      turnOffGyro();
-    }
+    if (enabled) turnOffGyro();
   });
 }
 
@@ -391,7 +380,7 @@ window.addEventListener("load", () => {
 
   hideMapButton(); hideGyroButton(); closeDropdown();
 
-  // ANIMAÇÃO (Desktop)
+  // ANIMAÇÃO DESKTOP
   let animationRunning = false;
   function runDropAnimation() {
     if (window.matchMedia("(max-width: 900px)").matches) return;
@@ -433,7 +422,7 @@ window.addEventListener("load", () => {
       autoLoad: true,
       hfov: START_HFOV,
       minHfov: MIN_HFOV, maxHfov: MAX_HFOV,
-      sceneFadeDuration: 900,
+      sceneFadeDuration: 300, // Otimização de velocidade
       showControls: false, orientationOnByDefault: false, autoRotate: false
     },
     scenes: {
@@ -618,5 +607,20 @@ window.addEventListener("load", () => {
     startTour(); 
   });
   
-  setTimeout(startTour, INTRO_DURATION_MS);
+  // --- PRELOADER INTELIGENTE ---
+  function preloadImages() {
+    const config = viewer.getConfig();
+    if (config && config.scenes) {
+      Object.keys(config.scenes).forEach(key => {
+        const img = new Image();
+        img.src = config.scenes[key].panorama;
+      });
+    }
+  }
+  
+  // Timeout para start auto e preload
+  setTimeout(() => {
+    startTour();
+    setTimeout(preloadImages, 2000); // Preload começa 2s depois de entrar
+  }, INTRO_DURATION_MS);
 });
