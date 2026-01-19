@@ -1,7 +1,5 @@
 /* ===============================
    Modern 360 Tour (Pannellum)
-   - Otimizado para Mobile (300ms fade, Preloader)
-   - Gyro inteligente (Touch desativa)
 ================================ */
 
 const INTRO_DURATION_MS = 5000;
@@ -275,7 +273,6 @@ function initMapModal(viewer) {
   });
 }
 
-// LÓGICA DO GYRO (Corrigida: desliga ao tocar)
 function initMobileGyroToggle(viewer){
   const gyroBtn = document.getElementById("gyroBtn");
   const panoEl = document.getElementById("panorama");
@@ -422,7 +419,7 @@ window.addEventListener("load", () => {
       autoLoad: true,
       hfov: START_HFOV,
       minHfov: MIN_HFOV, maxHfov: MAX_HFOV,
-      sceneFadeDuration: 300, // Otimização de velocidade
+      sceneFadeDuration: 300, // Faster Fade
       showControls: false, orientationOnByDefault: false, autoRotate: false
     },
     scenes: {
@@ -607,7 +604,7 @@ window.addEventListener("load", () => {
     startTour(); 
   });
   
-  // --- PRELOADER INTELIGENTE ---
+  // --- PRELOADER ---
   function preloadImages() {
     const config = viewer.getConfig();
     if (config && config.scenes) {
@@ -618,9 +615,8 @@ window.addEventListener("load", () => {
     }
   }
   
-  // Timeout para start auto e preload
   setTimeout(() => {
     startTour();
-    setTimeout(preloadImages, 2000); // Preload começa 2s depois de entrar
+    setTimeout(preloadImages, 2000);
   }, INTRO_DURATION_MS);
 });
